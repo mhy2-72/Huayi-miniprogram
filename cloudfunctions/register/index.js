@@ -1,0 +1,51 @@
+const cloud = require('wx-server-sdk');
+cloud.init();
+const db = cloud.database();
+
+function parseAge(birthdayStr) {
+  const birth = new Date(birthdayStr.replace(/-/g, '/'));
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const monthDiff = now.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  const { nickName, avatarUrl, birthday, gender } = event; // 新增 gender
+
+  // 检查是否已注册
+  const existing = await db.collection('users').doc(openid).get().catch(() => null);
+  if (existing && existing.data) {
+    return { code: -1, msg: '您已注册，请勿重复操作' };
+  }
+
+  if (!birthday) return { code: -1, msg: '请选择出生日期' };
+  if (!gender) return { code: -1, msg: '请选择性别' };
+
+  const age = parseAge(birthday);
+  if (age < 0 || age > 150) return { code: -1, msg: '出生日期不合法' };
+
+  const role = age >= 55 ? 'elder' : 'youth';
+
+  await db.collection('users').add({
+    data: {
+      _id: openid,
+      openid,
+      role,
+      nickName: nickName || '微信用户',
+      avatarUrl: avatarUrl || '',
+      birthday,
+      age,
+      gender,        // 存储 'male' 或 'female'
+      points: 0,
+      createTime: new Date()
+    }
+  });
+
+  return { code: 0, role, msg: '注册成功' };
+};

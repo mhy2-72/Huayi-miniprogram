@@ -1,0 +1,64 @@
+.my-points {
+  background: #07c160;
+  color: #fff;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
+  font-size: 32rpx;
+  text-align: center;
+}
+.product-card {
+  background: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  display: flex;
+  padding: 15rpx;
+}
+.product-img {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 10rpx;
+  margin-right: 20rpx;
+}
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.product-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+.product-desc {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15rpx;
+}
+.product-points {
+  color: #ff9500;
+  font-weight: bold;
+}
+.product-stock {
+  color: #999;
+  font-size: 24rpx;
+}
+.exchange-btn {
+  width: 100%;
+  background: #007aff;
+  color: #fff;
+}
+.exchange-btn[disabled] {
+  background: #ccc;
+}
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 30rpx;
+}

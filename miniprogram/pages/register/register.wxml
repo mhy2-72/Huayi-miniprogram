@@ -1,0 +1,29 @@
+<view class="container">
+  <view class="title">注册账号</view>
+
+  <!-- 头像 -->
+  <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+    <image class="avatar" src="{{avatarUrl}}" mode="aspectFill" wx:if="{{avatarUrl}}"></image>
+    <text wx:else>点击获取头像</text>
+  </button>
+
+  <!-- 昵称 -->
+  <input class="input" type="nickname" placeholder="请输入昵称" bindinput="onNickNameInput" value="{{nickName}}"/>
+
+  <!-- 出生日期 -->
+  <picker class="picker" mode="date" start="1900-01-01" end="{{today}}" value="{{birthday}}" bindchange="onBirthdayChange">
+    <view class="picker-text">{{birthday || '请选择出生日期'}}</view>
+  </picker>
+
+  <!-- 性别选择 -->
+  <view class="gender-section">
+    <text class="section-title">性别</text>
+    <radio-group bindchange="onGenderChange">
+      <label class="radio-item" wx:for="{{genders}}" wx:key="value">
+        <radio value="{{item.value}}" checked="{{gender === item.value}}"/>{{item.label}}
+      </label>
+    </radio-group>
+  </view>
+
+  <button class="submit-btn" bindtap="submitRegister">注册</button>
+</view>

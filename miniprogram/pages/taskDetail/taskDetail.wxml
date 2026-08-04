@@ -1,0 +1,60 @@
+<view class="container" wx:if="{{task}}">
+  <view class="task-info">
+    <text class="label">任务描述</text>
+    <text class="value">{{task.description}}</text>
+  </view>
+  <view class="task-info">
+    <text class="label">任务状态</text>
+    <text class="value">{{statusText[task.status]}}</text>
+  </view>
+  <view class="task-info" wx:if="{{task.createTime}}">
+    <text class="label">发布时间</text>
+    <text class="value">{{formatTime(task.createTime)}}</text>
+  </view>
+  <view class="task-info" wx:if="{{task.deadline}}">
+    <text class="label">截止时间</text>
+    <text class="value">{{formatTime(task.deadline)}}</text>
+  </view>
+
+  <!-- 任务图片凭证 -->
+  <view class="task-images" wx:if="{{task.images && task.images.length}}">
+    <text class="label">完成凭证</text>
+    <view class="img-list">
+      <image wx:for="{{task.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
+    </view>
+  </view>
+
+  <!-- 老人操作区 -->
+  <view wx:if="{{role === 'elder' && task.elderId === myOpenid}}" class="action-area">
+    <button wx:if="{{task.status === 'published'}}" bindtap="cancel" class="btn-cancel">取消任务</button>
+
+    <view wx:if="{{task.status === 'submitted'}}" class="rating-area">
+      <text class="rating-title">请给年轻人评分</text>
+      <view class="stars">
+        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+              bindtap="setRating" data-val="{{item}}"
+              class="star {{item <= rating ? 'active' : ''}}">★</text>
+      </view>
+      <button bindtap="confirmComplete" class="btn-confirm">确认完成 ({{rating}}分)</button>
+    </view>
+  </view>
+
+  <!-- 年轻人操作区 -->
+  <view wx:if="{{role === 'youth' && task.youthId === myOpenid}}" class="action-area">
+    <view wx:if="{{task.status === 'accepted'}}">
+      <button bindtap="chooseEvidence" class="btn-submit">上传凭证并提交</button>
+    </view>
+  </view>
+
+  <!-- 已结束状态 -->
+  <view wx:if="{{task.status === 'cancelled' || task.status === 'completed'}}" class="status-ended">
+    <text>任务已{{statusText[task.status]}}</text>
+    <text wx:if="{{task.rating}}">，评分：{{task.rating}}分</text>
+    <text wx:if="{{task.youthPoints}}">，年轻人获得{{task.youthPoints}}积分</text>
+    <text wx:if="{{task.elderPoints}}">，老人获得{{task.elderPoints}}积分</text>
+  </view>
+</view>
+
+<view wx:else class="empty">
+  <text>任务不存在或已删除</text>
+</view>

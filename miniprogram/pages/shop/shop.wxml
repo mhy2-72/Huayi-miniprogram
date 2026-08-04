@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="my-points">我的积分：{{myPoints}}</view>
+  <view class="product-list">
+    <view class="product-card" wx:for="{{products}}" wx:key="_id">
+      <image src="{{item.image}}" mode="aspectFill" class="product-img"></image>
+      <view class="product-info">
+        <text class="product-name">{{item.name}}</text>
+        <text class="product-desc">{{item.description}}</text>
+        <view class="product-footer">
+          <text class="product-points">{{item.points}}积分</text>
+          <text class="product-stock">剩余 {{item.stock}}</text>
+        </view>
+        <button class="exchange-btn" bindtap="exchange" data-id="{{item._id}}" disabled="{{myPoints < item.points || item.stock <= 0}}">兑换</button>
+      </view>
+    </view>
+    <view wx:if="{{!products.length}}" class="empty">暂无商品</view>
+  </view>
+</view>

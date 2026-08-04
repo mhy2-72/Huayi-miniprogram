@@ -1,0 +1,41 @@
+.publish-btn {
+  width: 100%;
+  background: #07c160;
+  color: #fff;
+  margin-bottom: 30rpx;
+}
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 20rpx 0;
+}
+.task-card {
+  background: #fff;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin-bottom: 15rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.desc {
+  font-size: 30rpx;
+  flex: 1;
+}
+.status {
+  font-size: 26rpx;
+  color: #888;
+}
+.accept-btn {
+  background: #007aff;
+  color: #fff;
+  font-size: 26rpx;
+  padding: 0 20rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+}
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 30rpx;
+}

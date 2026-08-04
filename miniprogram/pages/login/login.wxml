@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="logo">👵🏻👦🏻</view>
+  <text class="title">一老一小</text>
+  
+  <block wx:if="{{isChecking}}">
+    <text class="hint">正在检查账号...</text>
+  </block>
+  <block wx:elif="{{needRegister}}">
+    <text class="hint">欢迎新朋友</text>
+    <button class="register-btn" bindtap="goRegister">注册新账号</button>
+  </block>
+  <block wx:else>
+    <text class="hint">欢迎回来，{{userInfo.nickName}} {{greeting}}</text>
+    <button class="enter-btn" bindtap="goHome">进入首页</button>
+  </block>
+
+  <button wx:if="{{!isChecking && error}}" bindtap="retry" class="retry-btn">网络错误，点击重试</button>
+</view>

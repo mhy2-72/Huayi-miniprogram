@@ -1,0 +1,40 @@
+<view class="container">
+  <!-- 老人端 -->
+  <view wx:if="{{role === 'elder'}}" class="elder-panel">
+    <button class="publish-btn" bindtap="goPublish">＋ 发布新任务</button>
+    <view class="task-list">
+      <block wx:for="{{myTasks}}" wx:key="_id">
+        <view class="task-card" bindtap="goDetail" data-id="{{item._id}}">
+          <text class="desc">{{item.description}}</text>
+          <text class="status">{{statusText[item.status]}}</text>
+        </view>
+      </block>
+      <view wx:if="{{!myTasks.length}}" class="empty">暂无任务</view>
+    </view>
+  </view>
+
+  <!-- 年轻人端 -->
+  <view wx:else class="youth-panel">
+    <view class="section-title">可接任务</view>
+    <view class="task-list">
+      <block wx:for="{{published}}" wx:key="_id">
+        <view class="task-card" bindtap="goDetail" data-id="{{item._id}}">
+          <text class="desc">{{item.description}}</text>
+          <button class="accept-btn" catchtap="accept" data-id="{{item._id}}">接取</button>
+        </view>
+      </block>
+      <view wx:if="{{!published.length}}" class="empty">暂无任务</view>
+    </view>
+
+    <view class="section-title">我的任务</view>
+    <view class="task-list">
+      <block wx:for="{{myActive}}" wx:key="_id">
+        <view class="task-card" bindtap="goDetail" data-id="{{item._id}}">
+          <text class="desc">{{item.description}}</text>
+          <text class="status">{{statusText[item.status]}}</text>
+        </view>
+      </block>
+      <view wx:if="{{!myActive.length}}" class="empty">暂无进行中的任务</view>
+    </view>
+  </view>
+</view>

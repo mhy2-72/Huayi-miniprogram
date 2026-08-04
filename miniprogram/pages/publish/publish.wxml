@@ -1,0 +1,4 @@
+<view class="container">
+  <textarea placeholder="请描述您的需求，例如：帮忙取快递、陪伴聊天..." bindinput="onInput" value="{{description}}" maxlength="200"/>
+  <button bindtap="submit" class="submit-btn">发布任务</button>
+</view>

@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 40rpx;
+}
+.logo {
+  font-size: 100rpx;
+  margin-bottom: 30rpx;
+}
+.title {
+  font-size: 50rpx;
+  font-weight: bold;
+  margin-bottom: 80rpx;
+}
+.hint {
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 50rpx;
+}
+.register-btn, .enter-btn {
+  width: 60%;
+  margin-top: 30rpx;
+}
+.register-btn {
+  background: #07c160;
+  color: #fff;
+}
+.enter-btn {
+  background: #007aff;
+  color: #fff;
+}
+.retry-btn {
+  margin-top: 40rpx;
+  background: #fff;
+  color: #ff3b30;
+  border: 1px solid #ff3b30;
+}
