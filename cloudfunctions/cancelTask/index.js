@@ -12,13 +12,33 @@ exports.main = async (event, context) => {
 
   const isElder = task.data.elderId === userId;
   const isYouth = task.data.youthId === userId;
+
+  // 老人取消 published 任务
   if (isElder && task.data.status === 'published') {
     await db.collection('tasks').doc(taskId).update({ data: { status: 'cancelled' } });
-    return { code: 0 };
+    return { code: 0, msg: '任务已取消' };
   }
+
+  // 年轻人取消接取 (accepted)
   if (isYouth && task.data.status === 'accepted') {
-    await db.collection('tasks').doc(taskId).update({ data: { status: 'cancelled' } });
-    return { code: 0 };
+    const createTime = new Date(task.data.createTime);
+    const maxDeadline = new Date(createTime.getTime() + 48 * 60 * 60 * 1000);
+    let newDeadline = new Date(task.data.deadline.getTime() + 3 * 60 * 60 * 1000);
+    if (newDeadline > maxDeadline) newDeadline = maxDeadline;
+
+    await db.collection('tasks').doc(taskId).update({
+      data: {
+        status: 'published',
+        youthId: null,
+        acceptTime: null,
+        deadline: newDeadline,
+        evidenceImages: [],
+        submitNote: '',
+        submitTime: null
+      }
+    });
+    return { code: 0, msg: '已取消接取，任务重新发布' };
   }
-  return { code: -1, msg: '不可取消' };
+
+  return { code: -1, msg: '当前状态不可取消' };
 };

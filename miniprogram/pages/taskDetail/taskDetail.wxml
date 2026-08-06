@@ -1,60 +1,59 @@
 <view class="container" wx:if="{{task}}">
-  <view class="task-info">
-    <text class="label">任务描述</text>
-    <text class="value">{{task.description}}</text>
-  </view>
-  <view class="task-info">
-    <text class="label">任务状态</text>
-    <text class="value">{{statusText[task.status]}}</text>
-  </view>
-  <view class="task-info" wx:if="{{task.createTime}}">
-    <text class="label">发布时间</text>
-    <text class="value">{{formatTime(task.createTime)}}</text>
-  </view>
-  <view class="task-info" wx:if="{{task.deadline}}">
-    <text class="label">截止时间</text>
-    <text class="value">{{formatTime(task.deadline)}}</text>
+  <view class="task-info"><text class="label">任务描述</text><text class="value">{{task.description}}</text></view>
+  <view class="task-info"><text class="label">任务状态</text><text class="value">{{statusText[task.status]}}</text></view>
+
+  <view class="task-info"><text class="label">发布时间</text><text class="value">{{task.createTime_str}}</text></view>
+  <view class="task-info" wx:if="{{task.acceptTime_str}}"><text class="label">接取时间</text><text class="value">{{task.acceptTime_str}}</text></view>
+  <view class="task-info" wx:if="{{task.submitTime_str}}"><text class="label">提交时间</text><text class="value">{{task.submitTime_str}}</text></view>
+  <view class="task-info" wx:if="{{task.completeTime_str}}"><text class="label">完成时间</text><text class="value">{{task.completeTime_str}}</text></view>
+
+  <!-- 截止时间：仅 published/accepted 显示 -->
+  <view class="task-info" wx:if="{{task.status === 'published' || task.status === 'accepted'}}">
+    <text class="label">截止时间</text><text class="value">{{task.deadline_str}}</text>
   </view>
 
-  <!-- 任务图片凭证 -->
-  <view class="task-images" wx:if="{{task.images && task.images.length}}">
-    <text class="label">完成凭证</text>
+  <!-- 老人附上的图片（仅接取后的年轻人可见） -->
+  <view wx:if="{{role === 'youth' && task.youthId === myOpenid && task.status !== 'published' && task.imageUrls && task.imageUrls.length}}">
+    <text class="label">任务附图</text>
     <view class="img-list">
-      <image wx:for="{{task.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
+      <image wx:for="{{task.imageUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
     </view>
   </view>
 
-  <!-- 老人操作区 -->
+  <!-- 年轻人提交的凭证图片和说明 -->
+  <view wx:if="{{task.evidenceImageUrls && task.evidenceImageUrls.length}}">
+    <text class="label">完成凭证</text>
+    <view class="img-list">
+      <image wx:for="{{task.evidenceImageUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
+    </view>
+  </view>
+  <view wx:if="{{task.submitNote}}" class="task-info">
+    <text class="label">凭证说明</text><text class="value">{{task.submitNote}}</text>
+  </view>
+
+  <!-- 老人操作 -->
   <view wx:if="{{role === 'elder' && task.elderId === myOpenid}}" class="action-area">
     <button wx:if="{{task.status === 'published'}}" bindtap="cancel" class="btn-cancel">取消任务</button>
-
     <view wx:if="{{task.status === 'submitted'}}" class="rating-area">
-      <text class="rating-title">请给年轻人评分</text>
+      <text class="rating-title">请评分</text>
       <view class="stars">
-        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
-              bindtap="setRating" data-val="{{item}}"
-              class="star {{item <= rating ? 'active' : ''}}">★</text>
+        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" bindtap="setRating" data-val="{{item}}" class="star {{item <= rating ? 'active' : ''}}">★</text>
       </view>
       <button bindtap="confirmComplete" class="btn-confirm">确认完成 ({{rating}}分)</button>
     </view>
   </view>
 
-  <!-- 年轻人操作区 -->
+  <!-- 年轻人操作 -->
   <view wx:if="{{role === 'youth' && task.youthId === myOpenid}}" class="action-area">
-    <view wx:if="{{task.status === 'accepted'}}">
-      <button bindtap="chooseEvidence" class="btn-submit">上传凭证并提交</button>
-    </view>
+    <button wx:if="{{task.status === 'accepted'}}" bindtap="cancelAccept" class="btn-cancel-accept">取消接取</button>
+    <button wx:if="{{task.status === 'accepted'}}" bindtap="goSubmitEvidence" class="btn-submit">上传凭证</button>
   </view>
 
-  <!-- 已结束状态 -->
-  <view wx:if="{{task.status === 'cancelled' || task.status === 'completed'}}" class="status-ended">
-    <text>任务已{{statusText[task.status]}}</text>
-    <text wx:if="{{task.rating}}">，评分：{{task.rating}}分</text>
-    <text wx:if="{{task.youthPoints}}">，年轻人获得{{task.youthPoints}}积分</text>
-    <text wx:if="{{task.elderPoints}}">，老人获得{{task.elderPoints}}积分</text>
+  <view wx:if="{{task.status === 'completed'}}" class="status-ended">
+    <text>任务已完成</text><text wx:if="{{task.rating}}">，评分：{{task.rating}}分</text>
+    <text wx:if="{{task.youthPoints}}">，年轻人+{{task.youthPoints}}积分</text>
+    <text wx:if="{{task.elderPoints}}">，老人+{{task.elderPoints}}积分</text>
   </view>
+  <view wx:if="{{task.status === 'cancelled'}}" class="status-ended"><text>任务已取消</text></view>
 </view>
-
-<view wx:else class="empty">
-  <text>任务不存在或已删除</text>
-</view>
+<view wx:else class="empty"><text>任务不存在或已删除</text></view>

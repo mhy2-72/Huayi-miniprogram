@@ -7,9 +7,17 @@ Page({
     statusText: {
       published: '待接取',
       accepted: '进行中',
-      submitted: '待确认',
+      submitted: '待评价',
       completed: '已完成',
       cancelled: '已取消'
+    },
+    // 状态对应的 CSS 类名
+    statusClass: {
+      published: 'status-yellow',
+      accepted: 'status-gray',
+      submitted: 'status-red',
+      completed: 'status-blue',
+      cancelled: 'status-gray'
     }
   },
 
@@ -22,8 +30,16 @@ Page({
     this.loadData();
   },
 
+  onPullDownRefresh() {
+    this.loadData().then(() => {
+      wx.stopPullDownRefresh();
+    }).catch(() => {
+      wx.stopPullDownRefresh();
+    });
+  },
+
   loadData() {
-    wx.cloud.callFunction({ name: 'getMyTasks' }).then(res => {
+    return wx.cloud.callFunction({ name: 'getMyTasks' }).then(res => {
       const data = res.result;
       if (data.role === 'elder') {
         this.setData({ myTasks: data.tasks });
@@ -32,6 +48,8 @@ Page({
       }
     }).catch(err => {
       console.error('加载任务失败', err);
+      wx.showToast({ title: '加载失败', icon: 'none' });
+      throw err;
     });
   },
 

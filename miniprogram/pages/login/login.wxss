@@ -7,7 +7,9 @@
   padding: 40rpx;
 }
 .logo {
-  font-size: 100rpx;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
   margin-bottom: 30rpx;
 }
 .title {

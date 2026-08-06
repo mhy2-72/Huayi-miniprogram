@@ -22,17 +22,26 @@
   font-size: 30rpx;
   flex: 1;
 }
-.status {
+.status-text {
   font-size: 26rpx;
-  color: #888;
+  margin-left: 10rpx;
 }
+/* 颜色类 */
+.status-yellow .desc, .status-yellow .status-text { color: #f0ad4e; }
+.status-gray .desc, .status-gray .status-text { color: #999; }
+.status-red .desc, .status-red .status-text { color: #d9534f; }
+.status-blue .desc, .status-blue .status-text { color: #5bc0de; }
+
+/* 可接任务保持默认，仅按钮变绿色 */
+.available-task .desc { color: #333; }
 .accept-btn {
-  background: #007aff;
+  background: #07c160;
   color: #fff;
   font-size: 26rpx;
   padding: 0 20rpx;
   height: 60rpx;
   line-height: 60rpx;
+  border: none;
 }
 .empty {
   text-align: center;

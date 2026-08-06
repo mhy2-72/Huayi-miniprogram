@@ -5,18 +5,21 @@ const _ = db.command;
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
-  const user = await db.collection('users').doc(wxContext.OPENID).get();
+  const openid = wxContext.OPENID;
+  const user = await db.collection('users').doc(openid).get();
   const role = user.data.role;
+
   if (role === 'elder') {
-    const myTasks = await db.collection('tasks').where({ elderId: wxContext.OPENID })
+    const tasks = await db.collection('tasks').where({ elderId: openid })
       .orderBy('createTime', 'desc').get();
-    return { role: 'elder', tasks: myTasks.data };
+    return { role: 'elder', tasks: tasks.data };
   } else {
-    const published = await db.collection('tasks').where({ status: 'published' }).get();
+    const published = await db.collection('tasks').where({ status: 'published' })
+      .orderBy('createTime', 'desc').get();
     const myActive = await db.collection('tasks').where({
-      youthId: wxContext.OPENID,
-      status: _.in(['accepted', 'submitted'])
-    }).get();
+      youthId: openid,
+      status: _.in(['accepted', 'submitted', 'completed'])
+    }).orderBy('createTime', 'desc').get();
     return { role: 'youth', published: published.data, myActive: myActive.data };
   }
 };

@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="section">
+    <text class="label">文字说明</text>
+    <textarea placeholder="描述完成情况..." bindinput="onNoteInput" value="{{note}}" maxlength="200"/>
+  </view>
+  <view class="section">
+    <text class="label">凭证图片（最多3张）</text>
+    <view class="img-list">
+      <block wx:for="{{images}}" wx:key="index">
+        <image src="{{item}}" mode="aspectFill" class="upload-img" bindtap="previewImage" data-url="{{item}}"></image>
+      </block>
+      <view class="add-btn" bindtap="chooseImage" wx:if="{{images.length < 3}}">＋</view>
+    </view>
+  </view>
+  <button class="submit-btn" bindtap="submitEvidence">提交凭证</button>
+  <view class="error" wx:if="{{errorMsg}}">{{errorMsg}}</view>
+</view>

@@ -1,4 +1,19 @@
 <view class="container">
-  <textarea placeholder="请描述您的需求，例如：帮忙取快递、陪伴聊天..." bindinput="onInput" value="{{description}}" maxlength="200"/>
+  <textarea placeholder="请描述您的需求..." 
+            bindinput="onDescriptionInput" 
+            value="{{description}}" 
+            maxlength="200"/>
+  
+  <!-- 图片区域 -->
+  <view class="section">
+    <text class="label">任务图片（可选，仅接取者可见）</text>
+    <view class="img-list">
+      <block wx:for="{{images}}" wx:key="index">
+        <image src="{{item}}" mode="aspectFill" class="upload-img" bindtap="previewImage" data-url="{{item}}"></image>
+      </block>
+      <view class="add-btn" bindtap="chooseImage" wx:if="{{images.length < 3}}">＋</view>
+    </view>
+  </view>
+
   <button bindtap="submit" class="submit-btn">发布任务</button>
 </view>

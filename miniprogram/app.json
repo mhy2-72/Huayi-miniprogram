@@ -5,6 +5,7 @@
     "pages/index/index",
     "pages/publish/publish",
     "pages/taskDetail/taskDetail",
+    "pages/submitEvidence/submitEvidence",
     "pages/shop/shop",
     "pages/my/my"
   ],
