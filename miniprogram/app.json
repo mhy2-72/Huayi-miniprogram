@@ -7,12 +7,14 @@
     "pages/taskDetail/taskDetail",
     "pages/submitEvidence/submitEvidence",
     "pages/shop/shop",
-    "pages/my/my"
+    "pages/my/my",
+    "pages/notifications/notifications",
+    "pages/pointHistory/pointHistory"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#ffffff",
-    "navigationBarTitleText": "一老一小",
+    "navigationBarTitleText": "申出圆手",
     "navigationBarTextStyle": "black"
   },
   "useExtendedLib": {

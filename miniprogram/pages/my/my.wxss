@@ -48,3 +48,15 @@
 .menu-item:last-child {
   border-bottom: none;
 }
+/* 原有样式保持不变，菜单项增加间距 */
+.container { padding: 20rpx; }
+.user-info { display: flex; align-items: center; background: #fff; padding: 30rpx; border-radius: 10rpx; margin-bottom: 30rpx; }
+.avatar { width: 100rpx; height: 100rpx; border-radius: 50%; margin-right: 20rpx; }
+.nickname { font-size: 36rpx; font-weight: bold; }
+.role { font-size: 28rpx; color: #888; }
+.points-box { background: #fff; padding: 30rpx; border-radius: 10rpx; text-align: center; margin-bottom: 30rpx; }
+.points-label { font-size: 28rpx; color: #888; }
+.points-value { font-size: 60rpx; color: #07c160; font-weight: bold; }
+.menu-list { background: #fff; border-radius: 10rpx; }
+.menu-item { padding: 25rpx; border-bottom: 1rpx solid #eee; font-size: 30rpx; }
+.menu-item:last-child { border-bottom: none; }

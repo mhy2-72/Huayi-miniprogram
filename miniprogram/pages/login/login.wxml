@@ -1,6 +1,6 @@
 <view class="container">
   <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
-  <text class="title">一老一小</text>
+  <text class="title">申出圆手</text>
   
   <block wx:if="{{isChecking}}">
     <text class="hint">正在检查账号...</text>

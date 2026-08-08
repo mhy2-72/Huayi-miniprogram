@@ -16,8 +16,15 @@ exports.main = async (event, context) => {
       if (task.data.status === 'completed') return; // 已处理
       if (task.data.status !== 'submitted') throw new Error('当前状态不可评价');
 
-      const youthPoints = rating * 10;
-      const elderPoints = 20;
+      // 新积分计算逻辑
+      const difficulty = task.data.difficulty || 3;
+      const ratingScore = rating * 3;
+      const difficultyScore = difficulty * 5;
+      const totalScore = ratingScore + difficultyScore;
+      const percentage = (totalScore / 30) * 100;
+      const roundedPercent = Math.round(percentage);
+      const youthPoints = roundedPercent * 0.5;
+      const elderPoints = 0;  // 貌似应该没有这个对象，先置0
 
       await transaction.collection('tasks').doc(taskId).update({
         data: {

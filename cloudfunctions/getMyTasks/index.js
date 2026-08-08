@@ -10,16 +10,23 @@ exports.main = async (event, context) => {
   const role = user.data.role;
 
   if (role === 'elder') {
-    const tasks = await db.collection('tasks').where({ elderId: openid })
-      .orderBy('createTime', 'desc').get();
+    const tasks = await db.collection('tasks')
+      .where({ elderId: openid })
+      .orderBy('createTime', 'desc')
+      .get();
     return { role: 'elder', tasks: tasks.data };
   } else {
-    const published = await db.collection('tasks').where({ status: 'published' })
-      .orderBy('createTime', 'desc').get();
-    const myActive = await db.collection('tasks').where({
-      youthId: openid,
-      status: _.in(['accepted', 'submitted', 'completed'])
-    }).orderBy('createTime', 'desc').get();
+    const published = await db.collection('tasks')
+      .where({ status: 'published' })
+      .orderBy('createTime', 'desc')
+      .get();
+    const myActive = await db.collection('tasks')
+      .where({
+        youthId: openid,
+        status: _.in(['accepted', 'submitted', 'completed'])
+      })
+      .orderBy('createTime', 'desc')
+      .get();
     return { role: 'youth', published: published.data, myActive: myActive.data };
   }
 };

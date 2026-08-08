@@ -3,7 +3,7 @@ const app = getApp();
 Page({
   data: {
     userInfo: {},
-    roleText: ''   // 新增显示文本
+    roleText: ''
   },
 
   onLoad() {
@@ -36,14 +36,18 @@ Page({
     }
   },
 
-  goMyOrders() {
-    wx.navigateTo({ url: '/pages/myOrders/myOrders' });
+  goNotifications() {
+    wx.navigateTo({ url: '/pages/notifications/notifications' });
+  },
+
+  goPointHistory() {
+    wx.navigateTo({ url: '/pages/pointHistory/pointHistory' });
   },
 
   goAbout() {
     wx.showModal({
-      title: '关于我们',
-      content: '**互助平台，让邻里互助更温暖。',
+      title: '关于申出圆手',
+      content: '申出圆手互助平台，让邻里互助更温暖。',
       showCancel: false
     });
   }

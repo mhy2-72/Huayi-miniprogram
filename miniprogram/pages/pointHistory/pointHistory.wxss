@@ -1,0 +1,8 @@
+.container { padding: 20rpx; }
+.log-item { background: #fff; padding: 20rpx; border-radius: 10rpx; margin-bottom: 15rpx; display: flex; justify-content: space-between; align-items: center; }
+.desc { flex: 1; }
+.time { font-size: 24rpx; color: #999; display: block; margin-top: 6rpx; }
+.amount { font-size: 36rpx; font-weight: bold; }
+.income { color: #07c160; }
+.expense { color: #ff3b30; }
+.empty { text-align: center; margin-top: 200rpx; color: #999; }

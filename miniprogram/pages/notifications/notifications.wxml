@@ -1,0 +1,32 @@
+<!-- pages/notifications/notifications.wxml -->
+<view class="container">
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:elif="{{notifications.length === 0}}" class="empty">
+    <!-- 下方待后端开发完成后，修改回暂无通知 -->
+    <text>暂未开放</text>
+  </view>
+  
+  <view wx:else>
+    <view wx:for="{{notifications}}" wx:key="_id" 
+          class="notification-item {{item.read ? 'read' : 'unread'}}"
+          bindtap="goToTaskDetail" 
+          data-id="{{item._id}}"
+          data-taskid="{{item.taskId}}">
+      
+      <view class="notif-header">
+        <text class="notif-title">{{item.title}}</text>
+        <text wx:if="{{!item.read}}" class="unread-dot">●</text>
+      </view>
+      
+      <view class="notif-body">
+        <text class="notif-message">{{item.message}}</text>
+      </view>
+      
+      <view class="notif-footer">
+        <text class="notif-time">{{item.createTime_str}}</text>
+        <text class="notif-type">{{item.type === 'task_cancelled' ? '系统通知' : '任务通知'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

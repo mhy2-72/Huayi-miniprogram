@@ -1,7 +1,15 @@
 Page({
   data: {
     description: '',
-    images: []
+    images: [],
+    difficulty: 2,
+  },
+
+  setDifficulty(e) {  // 空函数，设置difficulty
+    const val = e.currentTarget.dataset.val;
+    this.setData({
+      difficulty: val
+    });
   },
 
   onDescriptionInput(e) {
@@ -24,14 +32,16 @@ Page({
   },
 
   async submit() {
-    const { description, images } = this.data;
+    const { description, images, difficulty } = this.data;
     if (!description.trim()) {
       wx.showToast({ title: '请输入任务描述', icon: 'none' });
       return;
     }
 
     wx.showLoading({ title: '发布中...' });
+
     try {
+      // 上传图片（如有）
       let cloudFileIDs = [];
       if (images.length > 0) {
         const uploadPromises = images.map(path => {
@@ -44,12 +54,18 @@ Page({
         cloudFileIDs = await Promise.all(uploadPromises);
       }
 
+      // 调用云函数
       const res = await wx.cloud.callFunction({
         name: 'publishTask',
-        data: { description: description.trim(), images: cloudFileIDs }
+        data: {
+          description: description.trim(),
+          images: cloudFileIDs,
+          difficulty: difficulty
+        }
       });
 
       wx.hideLoading();
+
       if (res.result.code === 0) {
         wx.showModal({
           title: '发布成功',
@@ -58,11 +74,18 @@ Page({
           success: () => wx.navigateBack()
         });
       } else {
-        wx.showToast({ title: res.result.msg, icon: 'none' });
+        // 显示云函数返回的错误信息
+        wx.showToast({ title: res.result.msg || '发布失败', icon: 'none' });
       }
-    } catch (e) {
+    } catch (err) {
       wx.hideLoading();
-      wx.showToast({ title: '网络错误', icon: 'none' });
+      console.error('发布任务失败', err);
+      // 显示具体异常信息（如“上传失败：xxx”或“云函数调用失败”）
+      wx.showToast({
+        title: err.errMsg || err.message || '网络错误，请重试',
+        icon: 'none',
+        duration: 2500
+      });
     }
   }
 });
