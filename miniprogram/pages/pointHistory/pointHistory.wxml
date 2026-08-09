@@ -1,14 +1,19 @@
 <view class="container">
-  <block wx:for="{{logs}}" wx:key="_id">
-    <view class="log-item">
-      <view class="desc">
-        <text>{{item.desc}}</text>
-        <text class="time">{{item.createTime}}</text>
-      </view>
-      <view class="amount {{item.amount > 0 ? 'income' : 'expense'}}">
-        {{item.amount > 0 ? '+' + item.amount : item.amount}}
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  
+  <block wx:elif="{{logs.length > 0}}">
+    <view class="log-list">
+      <view class="log-item" wx:for="{{logs}}" wx:key="_id">
+        <view class="log-left">
+          <text class="log-desc">{{item.desc}}</text>
+          <text class="log-time">{{item.createTime_str}}</text>
+        </view>
+        <view class="log-amount {{item.amount >= 0 ? 'income' : 'expense'}}">
+          {{item.amount >= 0 ? '+' + item.amount : item.amount}}
+        </view>
       </view>
     </view>
   </block>
-  <view wx:if="{{logs.length === 0 && !loading}}" class="empty">暂无积分变动记录</view>
+
+  <view wx:else class="empty">暂无积分变动记录</view>
 </view>

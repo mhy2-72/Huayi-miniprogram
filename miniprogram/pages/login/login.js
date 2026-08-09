@@ -1,4 +1,3 @@
-// login.js
 const app = getApp();
 
 Page({
@@ -7,11 +6,10 @@ Page({
     needRegister: false,
     error: false,
     userInfo: null,
-    greeting: ''    // 新增问候语
+    greeting: ''
   },
 
   async onLoad() {
-    // 等待 openid （同前）
     let count = 0;
     while (!app.globalData.openid && count < 30) {
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -44,13 +42,9 @@ Page({
       if (res.data && res.data.length > 0) {
         const user = res.data[0];
         wx.setStorageSync('role', user.role);
-        // 生成称呼
         const greeting = this.getGreeting(user.role, user.gender);
         this.setData({ isChecking: false, needRegister: false, userInfo: user, greeting });
-
-        setTimeout(() => {
-          wx.switchTab({ url: '/pages/index/index' });
-        }, 800);
+        // 不再自动跳转，等待用户手动点击“进入首页”
       } else {
         this.setData({ isChecking: false, needRegister: true });
       }
@@ -60,7 +54,6 @@ Page({
     }
   },
 
-  // 根据角色和性别返回称呼
   getGreeting(role, gender) {
     if (role === 'elder') {
       return gender === 'male' ? '爷爷' : '奶奶';
@@ -79,5 +72,10 @@ Page({
 
   retry() {
     this.checkUser();
+  },
+
+  // 跳转用户协议页面
+  showAgreement() {
+    wx.navigateTo({ url: '/pages/agreement/agreement' });
   }
 });

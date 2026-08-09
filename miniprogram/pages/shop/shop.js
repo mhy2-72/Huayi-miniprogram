@@ -3,8 +3,10 @@ const app = getApp();
 Page({
   data: {
     products: [],
-    myPoints: 0
+    myPoints: 0,
   },
+
+ 
 
   onLoad() {
     this.loadProducts();
@@ -48,7 +50,17 @@ Page({
     const productId = e.currentTarget.dataset.id;
     wx.cloud.callFunction({ name: 'exchangeProduct', data: { productId } }).then(res => {
       if (res.result.code === 0) {
-        wx.showToast({ title: '兑换成功' });
+        const code = Math.random().toString(36).slice(2, 10).toUpperCase();
+        wx.showToast({title:'兑换成功'});
+        wx.showModal({
+          title:'取货码',
+          content: (code).toString(),
+          showCancel:false,
+          confirmText:'确认',
+          success(){
+            console.log('用户已确认');
+          }
+        });
         if (res.result.pointsAfter !== undefined) {
           this.setData({ myPoints: res.result.pointsAfter });
         }

@@ -9,7 +9,8 @@
     "pages/shop/shop",
     "pages/my/my",
     "pages/notifications/notifications",
-    "pages/pointHistory/pointHistory"
+    "pages/pointHistory/pointHistory",
+    "pages/agreement/agreement"
   ],
   "window": {
     "backgroundTextStyle": "light",

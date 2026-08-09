@@ -1,7 +1,8 @@
 // cloudfunctions/getNotifications/index.js
 const cloud = require('wx-server-sdk');
-cloud.init();
+cloud.init({ env: 'cloud1-d3gqpcznd38f2891a' });
 const db = cloud.database();
+const _ = db.command;
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
@@ -9,7 +10,10 @@ exports.main = async (event, context) => {
 
   try {
     const res = await db.collection('notifications')
-      .where({ recipient: openid })
+      .where(_.or([
+        { recipient: openid },
+        { userId: openid }
+      ]))
       .orderBy('createTime', 'desc')
       .limit(100)
       .get();

@@ -40,3 +40,13 @@
   color: #ff3b30;
   border: 1px solid #ff3b30;
 }
+.agreement-link {
+  position: fixed;
+  bottom: 50rpx;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #007aff;
+  font-size: 26rpx;
+  text-decoration: underline;
+}

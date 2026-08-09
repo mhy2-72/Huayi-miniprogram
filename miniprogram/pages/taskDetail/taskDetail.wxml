@@ -11,6 +11,11 @@
   </view>
 
   <view class="task-info">
+    <text class="label">任务难度</text>
+    <text class="value">{{task.difficultyText || '未知'}}</text>
+  </view>
+
+  <view class="task-info">
     <text class="label">发布时间</text>
     <text class="value">{{task.createTime_str}}</text>
   </view>

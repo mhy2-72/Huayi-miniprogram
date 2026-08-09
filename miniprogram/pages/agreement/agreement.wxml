@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="icon">📄</view>
+  <text class="title">用户协议</text>
+  <text class="desc">请点击下方按钮查看完整协议</text>
+  <button class="view-btn" bindtap="openAgreement">查看用户协议</button>
+</view>

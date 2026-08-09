@@ -3,7 +3,9 @@ Page({
     avatarUrl: '',
     nickName: '',
     birthday: '',
-    gender: 'male',      // 默认男
+    gender: 'male',
+    occupationIndex: 0,
+    occupations: ['退休', '教师', '医护人员', '工人', '公务员', '自由职业', '其他'],
     today: new Date().toISOString().slice(0, 10),
     genders: [
       { value: 'male', label: '男' },
@@ -27,14 +29,20 @@ Page({
     this.setData({ gender: e.detail.value });
   },
 
+  onOccupationChange(e) {
+    this.setData({ occupationIndex: e.detail.value });
+  },
+
   async submitRegister() {
-    const { nickName, birthday, avatarUrl, gender } = this.data;
+    const { nickName, birthday, avatarUrl, gender, occupations, occupationIndex } = this.data;
+    const occupation = occupations[occupationIndex];
+
     if (!birthday) {
       wx.showToast({ title: '请选择出生日期', icon: 'none' });
       return;
     }
-    if (!gender) {
-      wx.showToast({ title: '请选择性别', icon: 'none' });
+    if (!occupation) {
+      wx.showToast({ title: '请选择职业', icon: 'none' });
       return;
     }
 
@@ -59,7 +67,8 @@ Page({
         nickName: nickName.trim() || '微信用户',
         avatarUrl: cloudAvatarUrl,
         birthday,
-        gender          // 新增
+        gender,
+        occupation       // 新增职业字段
       }
     }).then(res => {
       wx.hideLoading();

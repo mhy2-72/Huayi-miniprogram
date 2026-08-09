@@ -25,6 +25,41 @@ Page({
     this.loadData();
   },
 
+  async getUnreadCount(){
+    try{
+      const res = await wx.cloud.callFunction({name:'getUnreadCount'});
+      const count = res.result.count || 0;
+      if (count>0){
+        wx.setTabBarBadge({
+          index:1,
+          text:count>99?'99+':count.toString()
+        });
+      }else{
+        wx.removeTabBarBadge({
+          index:1
+        });
+      }
+    }catch(e){
+      console.error('获取未读数量失败:',e);
+    }
+  },
+
+  showNotificationPopup(count) {
+    wx.showModal({
+      title: '📨 新消息提醒',
+      content: `您有 ${count} 条新的任务通知，快去看看吧！`,
+      confirmText: '去查看',
+      cancelText: '稍后',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateTo({
+            url: '/pages/notifications/notifications'
+          });
+        }
+      }
+    });
+  },
+
   onShow() {
     this.loadData();
   },
@@ -161,17 +196,62 @@ Page({
     wx.navigateTo({ url: `/pages/taskDetail/taskDetail?id=${id}` });
   },
 
-  accept(e) {
+  async accept(e) {
     const taskId = e.currentTarget.dataset.id;
-    wx.cloud.callFunction({ name: 'acceptTask', data: { taskId } }).then(res => {
-      if (res.result.code === 0) {
-        wx.showToast({ title: '已接取' });
+    try {
+      const res = await wx.cloud.callFunction({
+        name:'acceptTask',
+        data: { taskId }
+      });
+      if (res.result.code === 0){
+        //发送任务已接通知
+        await this.sendNotification(taskId,'accspted');
+        wx.showToast({title:'已接取'});
         this.loadData();
-      } else {
-        wx.showToast({ title: res.result.msg, icon: 'none' });
+        this.getUnreadCount();
+      }else{
+        wx.showToast({title:res.result.msg,icon:'none)'});
       }
-    });
+    }catch(e){
+      wx.showToast({title:'操作失败',icon:'none'});
+    }
   },
+
+  // 新增发送通知方法
+  async sendNotification(taskId,type) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getMyTasks'
+      });
+      const data = res.result;
+      let task = null;
+        
+      if (data.role === 'elder') {
+        task = data.tasks.find(t => t._id === taskId);
+      } else {
+        task = data.published.find(t => t._id === taskId) || 
+                 data.myActive.find(t => t._id === taskId);
+      }
+      
+      if (!task) return;
+      
+      await wx.cloud.callFunction({
+        name: 'sendTaskNotification',
+        data: {
+          taskId: taskId,
+          type: type,
+          taskData: {
+           _id: task._id,
+            description: task.description,
+            elderId: task.elderId,
+            youthId: task.youthId
+          }
+        }
+      });
+    } catch (e) {
+      console.error('发送通知失败:', e);
+    }
+  },  
 
   // ========== 预览图片 ==========
   previewImage(e) {

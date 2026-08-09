@@ -15,4 +15,7 @@
   </block>
 
   <button wx:if="{{!isChecking && error}}" bindtap="retry" class="retry-btn">网络错误，点击重试</button>
+
+  <!-- 用户协议链接 -->
+  <view class="agreement-link" bindtap="showAgreement">用户协议</view>
 </view>

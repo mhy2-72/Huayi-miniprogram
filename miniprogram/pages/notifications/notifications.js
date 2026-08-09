@@ -16,15 +16,11 @@ Page({
   async loadNotifications() {
     try {
       this.setData({ loading: true });
-      const res = await wx.cloud.callFunction({
-        name: 'getNotifications'
-      });
-      
+      const res = await wx.cloud.callFunction({ name: 'getNotifications' });
       const notifications = res.result.data || [];
       notifications.forEach(item => {
         item.createTime_str = this.formatDate(item.createTime);
       });
-      
       this.setData({ notifications });
     } catch (e) {
       console.error('加载通知失败:', e);
@@ -44,31 +40,43 @@ Page({
     else return '';
     if (isNaN(d.getTime())) return '';
     const pad = n => n.toString().padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   },
 
   goToTaskDetail(e) {
     const taskId = e.currentTarget.dataset.taskid;
     const notifId = e.currentTarget.dataset.id;
-    
+
+    // 先标记已读并立即更新本地状态
+    this.markAsRead(notifId);
+
     if (taskId) {
-      this.markAsRead(notifId);
       wx.navigateTo({
         url: `/pages/taskDetail/taskDetail?id=${taskId}`
       });
     } else {
-      wx.showToast({ title: '任务已删除', icon: 'none' });
+      // 无关联任务的通知，仅提示已读
+      wx.showToast({ title: '已标记已读', icon: 'none' });
     }
   },
 
-  async markAsRead(notifId) {
-    try {
-      await wx.cloud.callFunction({
-        name: 'markNotificationRead',
-        data: { notificationId: notifId }
-      });
-    } catch (e) {
-      console.error('标记已读失败:', e);
-    }
+  markAsRead(notifId) {
+    // 立即更新本地状态（视觉上立刻变灰）
+    const updatedList = this.data.notifications.map(item => {
+      if (item._id === notifId) {
+        return { ...item, read: true };
+      }
+      return item;
+    });
+    this.setData({ notifications: updatedList });
+
+    // 异步调用云函数，失败时恢复本地状态（可选）
+    wx.cloud.callFunction({
+      name: 'markNotificationRead',
+      data: { notificationId: notifId }
+    }).catch(err => {
+      console.error('标记已读失败:', err);
+      // 若云函数失败，可恢复未读状态（但一般不处理，避免频繁闪动）
+    });
   }
 });

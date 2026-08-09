@@ -15,7 +15,7 @@
     <view class="picker-text">{{birthday || '请选择出生日期'}}</view>
   </picker>
 
-  <!-- 性别选择 -->
+  <!-- 性别 -->
   <view class="gender-section">
     <text class="section-title">性别</text>
     <radio-group bindchange="onGenderChange">
@@ -23,6 +23,14 @@
         <radio value="{{item.value}}" checked="{{gender === item.value}}"/>{{item.label}}
       </label>
     </radio-group>
+  </view>
+
+  <!-- 职业选择 -->
+  <view class="section">
+    <text class="section-title">职业</text>
+    <picker class="picker" mode="selector" range="{{occupations}}" value="{{occupationIndex}}" bindchange="onOccupationChange">
+      <view class="picker-text">{{occupations[occupationIndex] || '请选择职业'}}</view>
+    </picker>
   </view>
 
   <button class="submit-btn" bindtap="submitRegister">注册</button>

@@ -10,6 +10,10 @@ exports.main = async (event, context) => {
   if (!productId) return { code: -1, msg: '商品ID不能为空' };
 
   try {
+    let exchangeCode = '';
+    let productName = '';
+    let costPoints = 0;
+
     const result = await db.runTransaction(async transaction => {
       const product = await transaction.collection('products').doc(productId).get();
       if (!product.data) throw new Error('商品不存在');
@@ -19,31 +23,63 @@ exports.main = async (event, context) => {
       if (!user.data) throw new Error('用户不存在');
       if (user.data.points < product.data.points) throw new Error('积分不足');
 
+      costPoints = product.data.points;
+
+      // 扣减库存和积分
       await transaction.collection('products').doc(productId).update({
         data: { stock: db.command.inc(-1) }
       });
-
       await transaction.collection('users').doc(userId).update({
-        data: { points: db.command.inc(-product.data.points) }
+        data: { points: db.command.inc(-costPoints) }
       });
 
+      exchangeCode = Math.random().toString(36).slice(2, 10).toUpperCase();
+      productName = product.data.name;
+
+      // 创建订单
       await transaction.collection('orders').add({
         data: {
           userId,
           productId,
-          pointsCost: product.data.points,
+          pointsCost: costPoints,
           status: 'pending',
           createTime: new Date(),
-          code: Math.random().toString(36).slice(2, 10).toUpperCase()
+          code: exchangeCode
         }
       });
 
-      return {
-        pointsAfter: user.data.points - product.data.points
-      };
+      return { pointsAfter: user.data.points - costPoints };
     });
 
-    return { code: 0, msg: '兑换成功', pointsAfter: result.pointsAfter };
+    // 写入积分消费日志
+    await db.collection('pointLogs').add({
+      data: {
+        userId,
+        amount: -costPoints,
+        type: 'expense',
+        desc: `兑换“${productName}”消费${costPoints}积分，兑换码：${exchangeCode}`,
+        createTime: new Date()
+      }
+    });
+
+    // 发送通知
+    await db.collection('notifications').add({
+      data: {
+        userId,
+        title: '兑换成功',
+        message: `您已成功兑换「${productName}」，兑换码：${exchangeCode}`,
+        taskId: '',
+        type: 'exchange',
+        read: false,
+        createTime: new Date()
+      }
+    });
+
+    return {
+      code: 0,
+      msg: '兑换成功',
+      pointsAfter: result.pointsAfter
+    };
   } catch (e) {
     console.error('exchangeProduct error:', e);
     return { code: -1, msg: e.message || '兑换失败' };

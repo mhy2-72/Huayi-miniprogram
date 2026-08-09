@@ -1,4 +1,3 @@
-// cloudfunctions/autoCancelTasks/index.js
 const cloud = require('wx-server-sdk');
 cloud.init();
 const db = cloud.database();
@@ -12,7 +11,7 @@ exports.main = async (event, context) => {
     autoRated: 0
   };
 
-  // ========== 1. 发布超过8小时未被接取的任务自动取消 ==========
+  // ========== 1. 发布超过8小时未被接取自动取消 ==========
   const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
   const expiredPublishedTasks = await db.collection('tasks').where({
     status: 'published',
@@ -30,22 +29,18 @@ exports.main = async (event, context) => {
     });
 
     for (const task of expiredPublishedTasks.data) {
-      try {
-        const title = task.title || task.description?.substring(0, 20) || '未命名任务';
-        await db.collection('notifications').add({
-          data: {
-            recipient: task.elderId,
-            type: 'task_cancelled',
-            taskId: task._id,
-            title: title,
-            message: `您发布的任务 "${title}" 超过8小时未被接取，已被系统自动取消。如需重新发布，请创建新任务。`,
-            read: false,
-            createTime: new Date()
-          }
-        });
-      } catch (e) {
-        console.error('写入通知失败', task._id, e);
-      }
+      const title = task.title || task.description?.substring(0, 20) || '未命名任务';
+      await db.collection('notifications').add({
+        data: {
+          recipient: task.elderId,
+          type: 'task_cancelled',
+          taskId: task._id,
+          title: title,
+          message: `您发布的任务 "${title}" 超过8小时未被接取，已被系统自动取消。`,
+          read: false,
+          createTime: new Date()
+        }
+      });
     }
     result.eightHourCancelled = expiredPublishedTasks.data.length;
   }
@@ -67,36 +62,30 @@ exports.main = async (event, context) => {
     });
 
     for (const task of expiredDeadlineTasks.data) {
-      try {
-        const title = task.title || task.description?.substring(0, 20) || '未命名任务';
-        
+      const title = task.title || task.description?.substring(0, 20) || '未命名任务';
+      await db.collection('notifications').add({
+        data: {
+          recipient: task.elderId,
+          type: 'task_cancelled',
+          taskId: task._id,
+          title: title,
+          message: `任务 "${title}" 因超过截止时间未完成，已被系统自动取消。`,
+          read: false,
+          createTime: new Date()
+        }
+      });
+      if (task.youthId) {
         await db.collection('notifications').add({
           data: {
-            recipient: task.elderId,
+            recipient: task.youthId,
             type: 'task_cancelled',
             taskId: task._id,
             title: title,
-            message: `任务 "${title}" 因超过截止时间未完成，已被系统自动取消。`,
+            message: `您接取的任务 "${title}" 因超过截止时间未完成，已被系统自动取消。`,
             read: false,
             createTime: new Date()
           }
         });
-
-        if (task.youthId) {
-          await db.collection('notifications').add({
-            data: {
-              recipient: task.youthId,
-              type: 'task_cancelled',
-              taskId: task._id,
-              title: title,
-              message: `您接取的任务 "${title}" 因超过截止时间未完成，已被系统自动取消。`,
-              read: false,
-              createTime: new Date()
-            }
-          });
-        }
-      } catch (e) {
-        console.error('写入通知失败', task._id, e);
       }
     }
     result.deadlineCancelled = expiredDeadlineTasks.data.length;
@@ -114,10 +103,17 @@ exports.main = async (event, context) => {
       await db.runTransaction(async transaction => {
         const t = await transaction.collection('tasks').doc(task._id).get();
         if (t.data.status !== 'submitted') return;
-        
-        const youthPoints = 5 * 10;
-        const elderPoints = 20;
-        
+
+        const difficulty = t.data.difficulty || 3;
+        // 使用统一积分公式：评分5，难度为任务难度
+        const ratingScore = 5 * 3;
+        const difficultyScore = difficulty * 5;
+        const totalScore = ratingScore + difficultyScore;
+        const percentage = (totalScore / 30) * 100;
+        const roundedPercent = Math.round(percentage);
+        const youthPoints = roundedPercent * 0.5;
+        const elderPoints = 0;
+
         await transaction.collection('tasks').doc(task._id).update({
           data: {
             status: 'completed',
@@ -127,16 +123,20 @@ exports.main = async (event, context) => {
             completeTime: new Date()
           }
         });
-        
-        if (t.data.youthId) {
+
+        if (t.data.youthId && youthPoints > 0) {
           await transaction.collection('users').doc(t.data.youthId).update({
             data: { points: _.inc(youthPoints) }
           });
-        }
-        
-        if (t.data.elderId) {
-          await transaction.collection('users').doc(t.data.elderId).update({
-            data: { points: _.inc(elderPoints) }
+          await transaction.collection('pointLogs').add({
+            data: {
+              userId: t.data.youthId,
+              amount: youthPoints,
+              type: 'income',
+              desc: `任务“${t.data.description}”自动好评，获得${youthPoints}积分（评分5，难度${difficulty}）`,
+              taskId: task._id,
+              createTime: new Date()
+            }
           });
         }
       });

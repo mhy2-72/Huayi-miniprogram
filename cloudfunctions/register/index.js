@@ -16,16 +16,13 @@ function parseAge(birthdayStr) {
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
-  const { nickName, avatarUrl, birthday, gender } = event; // 新增 gender
+  const { nickName, avatarUrl, birthday, gender, occupation } = event;
 
-  // 检查是否已注册
   const existing = await db.collection('users').doc(openid).get().catch(() => null);
-  if (existing && existing.data) {
-    return { code: -1, msg: '您已注册，请勿重复操作' };
-  }
+  if (existing && existing.data) return { code: -1, msg: '您已注册，请勿重复操作' };
 
   if (!birthday) return { code: -1, msg: '请选择出生日期' };
-  if (!gender) return { code: -1, msg: '请选择性别' };
+  if (!occupation) return { code: -1, msg: '请选择职业' };
 
   const age = parseAge(birthday);
   if (age < 0 || age > 150) return { code: -1, msg: '出生日期不合法' };
@@ -41,7 +38,8 @@ exports.main = async (event, context) => {
       avatarUrl: avatarUrl || '',
       birthday,
       age,
-      gender,        // 存储 'male' 或 'female'
+      gender,
+      occupation,    // 新增职业字段
       points: 0,
       createTime: new Date()
     }

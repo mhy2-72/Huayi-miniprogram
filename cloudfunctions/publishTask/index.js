@@ -1,3 +1,4 @@
+//cloudfunctions\publishTask\index.js
 const cloud = require('wx-server-sdk');
 const axios = require('axios'); // 引入axios
 cloud.init();
@@ -51,21 +52,21 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const elderId = wxContext.OPENID;
   const { description, images } = event;
-  let difficulty = event;
 
   const user = await db.collection('users').doc(elderId).get();
   if (user.data.role !== 'elder') return { code: -1, msg: '仅老人可发布任务' };
 
+  // 并发限制改为 1
   const activeCount = await db.collection('tasks').where({
     elderId,
     status: db.command.in(['published', 'accepted', 'submitted'])
   }).count();
-  if (activeCount.total >= 3) return { code: -1, msg: '您已有3个未完成任务' };
+  if (activeCount.total >= 1) return { code: -1, msg: '您已有未完成任务，请先完成或取消' };
 
   const now = new Date();
   const deadline = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
-  difficulty = 2;
+  let difficulty = 2;
   try {
     //调用 DeepSeek API
     const response = await axios.post('https://api.deepseek.com/v1/chat/completions', {

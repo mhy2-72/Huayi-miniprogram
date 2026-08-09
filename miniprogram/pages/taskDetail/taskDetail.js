@@ -1,4 +1,3 @@
-// pages/taskDetail/taskDetail.js
 const app = getApp();
 
 Page({
@@ -35,6 +34,10 @@ Page({
     this.loadTaskDetail(taskId).finally(() => wx.stopPullDownRefresh());
   },
 
+  onShow() {
+    this.updateUnreadBadge();
+  },
+
   async loadTaskDetail(taskId) {
     try {
       const res = await wx.cloud.callFunction({ name: 'getMyTasks' });
@@ -48,10 +51,19 @@ Page({
                data.myActive.find(t => t._id === taskId);
       }
       
+      if (!task) {
+        const directRes = await wx.cloud.callFunction({
+          name: 'getTaskById',
+          data: { taskId }
+        });
+        if (directRes.result.code === 0) {
+          task = directRes.result.data;
+        }
+      }
+      
       if (task) {
         const processed = await this.processTask(task);
         this.setData({ task: processed });
-        // 检测自动取消原因并弹窗
         this.checkAutoCancelReason(processed);
       } else {
         wx.showToast({ title: '任务不存在', icon: 'none' });
@@ -62,7 +74,6 @@ Page({
     }
   },
 
-  // 检测自动取消原因并弹窗
   checkAutoCancelReason(task) {
     if (task.status !== 'cancelled') return;
     if (!task.cancelReason) return;
@@ -93,6 +104,9 @@ Page({
       }
     });
     
+    // 难度文本转换
+    newTask.difficultyText = this.getDifficultyText(newTask.difficulty);
+    
     // 老人附图
     if (newTask.images?.length) {
       try {
@@ -118,6 +132,14 @@ Page({
     }
     
     return newTask;
+  },
+
+  // 将难度数值转换为文本显示
+  getDifficultyText(difficulty) {
+    if (!difficulty) return '未知';
+    const stars = ['★☆☆☆☆', '★★☆☆☆', '★★★☆☆'];
+    // 假设 difficulty 为 1,2,3
+    return stars[difficulty - 1] || '未知';
   },
 
   formatDate(date) {
@@ -150,6 +172,7 @@ Page({
             data: { taskId: task._id, rating } 
           });
           if (res.result.code === 0) { 
+            await this.sendNotification('completed');
             wx.showToast({ title: '评价成功' }); 
             this.loadTaskDetail(task._id); 
           } else {
@@ -176,7 +199,8 @@ Page({
               cancelReason: '用户主动取消'
             } 
           });
-          if (res.result.code === 0) { 
+          if (res.result.code === 0) {
+            await this.sendNotification('cancelled');
             wx.showToast({ title: '已取消' }); 
             this.loadTaskDetail(this.data.task._id); 
           } else {
@@ -203,7 +227,8 @@ Page({
               cancelReason: '年轻人主动放弃接取'
             } 
           });
-          if (res.result.code === 0) { 
+          if (res.result.code === 0) {
+            await this.sendNotification('youth_cancelled');
             wx.showToast({ title: '已取消接取' }); 
             this.loadTaskDetail(this.data.task._id); 
           } else {
@@ -224,7 +249,72 @@ Page({
 
   previewImage(e) {
     const url = e.currentTarget.dataset.url;
-    const urls = this.data.task.imageUrls || [];
-    wx.previewImage({ urls, current: url });
+    const imageUrls = this.data.task.imageUrls || [];
+    const evidenceUrls = this.data.task.evidenceImageUrls || [];
+    const allUrls = [...imageUrls, ...evidenceUrls];
+    wx.previewImage({ 
+      urls: allUrls, 
+      current: url 
+    });
+  },
+
+  handleTestSubscribe() {
+    wx.requestSubscribeMessage({
+      tmplIds: ['5-rezkv5Ou5ph7UMnVjUX2gVZAg4VFgW-5_c137PrX0'], 
+      success(res) { 
+        console.log('用户允许了订阅', res);
+      },
+      fail(err) { 
+        console.log('用户拒绝了或报错', err);
+      }
+    })
+  },
+
+  async sendNotification(type) {
+    try {
+      const task = this.data.task;
+      if (!task) return;
+    
+      await wx.cloud.callFunction({
+       name: 'sendTaskNotification',
+       data: {
+          taskId: task._id,
+          type: type,
+          taskData: {
+            _id: task._id,
+            description: task.description,
+            elderId: task.elderId,
+            youthId: task.youthId,
+            status: task.status,
+            cancelReason: task.cancelReason,
+            youthPoints: task.youthPoints || 0
+          }
+        }
+      });
+      console.log('通知发送成功');
+    } catch (e) {
+      console.error('发送通知失败:', e);
+    }
+  },
+
+  async updateUnreadBadge() {
+   try {
+      const res = await wx.cloud.callFunction({ name: 'getUnreadCount' });
+      const count = res.result.count || 0;
+      const NOTIF_TAB_INDEX = 2;
+    
+      if (count > 0) {
+        wx.setTabBarBadge({
+          index: NOTIF_TAB_INDEX,
+          text: count > 99 ? '99+' : count.toString()
+        });
+      } else {
+        wx.removeTabBarBadge({
+          index: NOTIF_TAB_INDEX
+        });
+      }
+    } catch (e) {
+      console.error('更新未读角标失败:', e);
+    }
   }
 });

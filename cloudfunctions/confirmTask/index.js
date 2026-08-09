@@ -13,10 +13,9 @@ exports.main = async (event, context) => {
     await db.runTransaction(async transaction => {
       const task = await transaction.collection('tasks').doc(taskId).get();
       if (task.data.elderId !== elderId) throw new Error('仅发布者可操作');
-      if (task.data.status === 'completed') return; // 已处理
+      if (task.data.status === 'completed') return;
       if (task.data.status !== 'submitted') throw new Error('当前状态不可评价');
 
-      // 新积分计算逻辑
       const difficulty = task.data.difficulty || 3;
       const ratingScore = rating * 3;
       const difficultyScore = difficulty * 5;
@@ -24,7 +23,7 @@ exports.main = async (event, context) => {
       const percentage = (totalScore / 30) * 100;
       const roundedPercent = Math.round(percentage);
       const youthPoints = roundedPercent * 0.5;
-      const elderPoints = 0;  // 貌似应该没有这个对象，先置0
+      const elderPoints = 0;
 
       await transaction.collection('tasks').doc(taskId).update({
         data: {
@@ -35,12 +34,29 @@ exports.main = async (event, context) => {
           completeTime: new Date()
         }
       });
+
+      // 更新用户积分
       await transaction.collection('users').doc(task.data.youthId).update({
         data: { points: db.command.inc(youthPoints) }
       });
       await transaction.collection('users').doc(elderId).update({
         data: { points: db.command.inc(elderPoints) }
       });
+
+      // 写入年轻人积分获得日志
+      if (youthPoints > 0) {
+        await transaction.collection('pointLogs').add({
+          data: {
+            userId: task.data.youthId,
+            amount: youthPoints,
+            type: 'income',
+            desc: `完成“${task.data.description}”获得${youthPoints}积分（评分${rating}，难度${difficulty}）`,
+            taskId: taskId,
+            createTime: new Date()
+          }
+        });
+      }
+      // 老人积分变动为0，可不记录（如需记录可将elderPoints设为20等固定值）
     });
     return { code: 0, msg: '评价成功' };
   } catch (e) {

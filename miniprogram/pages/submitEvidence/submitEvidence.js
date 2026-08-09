@@ -47,6 +47,7 @@ Page({
       });
       wx.hideLoading();
       if (res.result.code === 0) {
+        await this.sendNotification(taskId,'submitted');
         wx.showToast({ title: '提交成功' });
         setTimeout(() => wx.navigateBack(), 1000);
       } else {
@@ -54,7 +55,43 @@ Page({
       }
     } catch (e) {
       wx.hideLoading();
+      console.error('提交凭证失败:',e);
       this.setData({ errorMsg: '网络错误' });
     }
-  }
+  },
+    // 新增发送通知方法
+  async sendNotification(taskId, type) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getMyTasks'
+      });
+      const data = res.result;
+      let task = null;
+      
+      if (data.role === 'elder') {
+        task = data.tasks.find(t => t._id === taskId);
+      } else {
+        task = data.published.find(t => t._id === taskId) || 
+               data.myActive.find(t => t._id === taskId);
+      }
+    
+      if (!task) return;
+    
+      await wx.cloud.callFunction({
+        name: 'sendTaskNotification',
+        data: {
+          taskId: taskId,
+          type: type,
+          taskData: {
+           _id: task._id,
+            description: task.description,
+            elderId: task.elderId,
+            youthId: task.youthId
+          }
+        }
+      });
+    } catch (e) {
+      console.error('发送通知失败:', e);
+    }
+  },  
 });

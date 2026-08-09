@@ -67,3 +67,13 @@
   margin-right: 30rpx;
   font-size: 30rpx;
 }
+.section {
+  margin: 20rpx 0;
+}
+.section-title {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
+}
+/* 性别选择样式沿用之前的 gender-section，保持一致 */

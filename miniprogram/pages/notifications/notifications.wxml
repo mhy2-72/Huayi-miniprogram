@@ -4,7 +4,7 @@
 
   <view wx:elif="{{notifications.length === 0}}" class="empty">
     <!-- 下方待后端开发完成后，修改回暂无通知 -->
-    <text>暂未开放</text>
+    <text>暂无通知</text>
   </view>
   
   <view wx:else>
