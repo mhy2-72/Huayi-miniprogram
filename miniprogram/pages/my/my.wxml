@@ -17,6 +17,11 @@
     <view class="menu-item" bindtap="goPointHistory">积分变动记录</view>
     <view class="menu-item" bindtap="goAbout">关于我们</view>
   </view>
+  
+  <view class="logout-section">
+    <button class="logout-btn" bindtap="deleteAccount">注销账号</button>
+  </view>
 </view>
+
 <!-- 这是那个测试按钮 -->
 <button type="primary" style="width:320rpx;margin-top:20rpx;margin:0 auto" bindtap="handleTestSubscribe">测试订阅授权</button>

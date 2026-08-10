@@ -33,5 +33,14 @@
     </picker>
   </view>
 
-  <button class="submit-btn" bindtap="submitRegister">注册</button>
+  <!-- 用户协议复选框 -->
+  <view class="agreement-section">
+    <label class="checkbox-label">
+      <checkbox class="checkbox" value="agree" checked="{{agreed}}" bindtap="onAgreeChange"/>
+      <text class="agreement-text">我已阅读并同意</text>
+      <text class="agreement-link" catchtap="showAgreement">《用户协议》</text>
+    </label>
+  </view>
+
+  <button class="submit-btn" bindtap="submitRegister" disabled="{{!agreed}}">注册</button>
 </view>

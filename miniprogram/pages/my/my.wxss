@@ -60,3 +60,12 @@
 .menu-list { background: #fff; border-radius: 10rpx; }
 .menu-item { padding: 25rpx; border-bottom: 1rpx solid #eee; font-size: 30rpx; }
 .menu-item:last-child { border-bottom: none; }
+.logout-section {
+  margin-top: 60rpx;
+  padding: 20rpx;
+}
+.logout-btn {
+  background: #ff3b30;
+  color: #fff;
+  font-size: 30rpx;
+}

@@ -4,6 +4,7 @@ Page({
     myTasks: [],
     published: [],
     myActive: [],
+    loading: true,             // 新增加载状态，初始为 true
     statusText: {
       published: '待接取',
       accepted: '进行中',
@@ -73,23 +74,25 @@ Page({
   },
 
   loadData() {
+    this.setData({ loading: true });   // 开始加载
     return wx.cloud.callFunction({ name: 'getMyTasks' }).then(async res => {
       const data = res.result;
       if (data.role === 'elder') {
         // 处理老人的任务列表（含附图）
         const tasks = await this.processTasks(data.tasks);
-        this.setData({ myTasks: tasks });
+        this.setData({ myTasks: tasks, loading: false });
         this.checkAutoCancelledTasks(tasks);
       } else {
         // 处理年轻人的任务列表（含附图 + 凭证图片）
         const published = await this.processTasks(data.published);
         const myActive = await this.processTasks(data.myActive);
-        this.setData({ published, myActive });
+        this.setData({ published, myActive, loading: false });
         const allTasks = [...published, ...myActive];
         this.checkAutoCancelledTasks(allTasks);
       }
     }).catch(err => {
       console.error('加载任务失败', err);
+      this.setData({ loading: false });   // 加载失败也要结束 loading
       wx.showToast({ title: '加载失败', icon: 'none' });
       throw err;
     });
@@ -153,7 +156,7 @@ Page({
     const pad = n => n.toString().padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   },
-
+  
   // ========== 检测自动取消的任务 ==========
   checkAutoCancelledTasks(tasks) {
     if (!tasks || tasks.length === 0) return;

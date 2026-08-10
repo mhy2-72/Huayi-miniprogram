@@ -50,5 +50,33 @@ Page({
       content: '申出圆手互助平台，让邻里互助更温暖。',
       showCancel: false
     });
+  },
+
+  deleteAccount() {
+    wx.showModal({
+      title: '注销账号',
+      content: '注销后您的所有信息将被清除，此操作不可恢复，确定继续？',
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          wx.showLoading({ title: '注销中...' });
+          const result = await wx.cloud.callFunction({
+            name: 'deleteAccount'
+          });
+          wx.hideLoading();
+          if (result.result.code === 0) {
+            // 清除本地缓存
+            wx.removeStorageSync('role');
+            app.globalData.userInfo = null;
+            wx.reLaunch({ url: '/pages/login/login' });
+          } else {
+            wx.showToast({ title: result.result.msg || '注销失败', icon: 'none' });
+          }
+        } catch (e) {
+          wx.hideLoading();
+          wx.showToast({ title: '网络错误', icon: 'none' });
+        }
+      }
+    });
   }
 });

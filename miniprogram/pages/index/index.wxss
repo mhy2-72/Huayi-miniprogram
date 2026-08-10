@@ -99,3 +99,9 @@
   line-height: 120rpx;
   margin-right: 8rpx;
 }
+.loading-tip {
+  text-align: center;
+  padding: 200rpx 0;
+  color: #999;
+  font-size: 30rpx;
+}

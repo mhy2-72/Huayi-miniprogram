@@ -108,3 +108,45 @@ button {
   margin-top: 100rpx;
   color: #999;
 }
+
+.participants {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  padding: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+}
+.participant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.participant-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-bottom: 10rpx;
+}
+.participant-name {
+  font-size: 28rpx;
+  color: #333;
+}
+.divider {
+  margin: 0 20rpx;
+  font-size: 36rpx;
+  color: #ccc;
+}
+.participant-role {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 6rpx;
+}
+.loading-tip {
+  text-align: center;
+  padding: 200rpx 0;
+  color: #999;
+  font-size: 30rpx;
+}

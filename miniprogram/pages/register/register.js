@@ -10,7 +10,8 @@ Page({
     genders: [
       { value: 'male', label: '男' },
       { value: 'female', label: '女' }
-    ]
+    ],
+    agreed: false    // 用户协议复选框状态
   },
 
   onChooseAvatar(e) {
@@ -33,8 +34,13 @@ Page({
     this.setData({ occupationIndex: e.detail.value });
   },
 
+  // 复选框事件
+  onAgreeChange() {
+    this.setData({ agreed: !this.data.agreed });
+  },
+
   async submitRegister() {
-    const { nickName, birthday, avatarUrl, gender, occupations, occupationIndex } = this.data;
+    const { nickName, birthday, avatarUrl, gender, occupations, occupationIndex, agreed } = this.data;
     const occupation = occupations[occupationIndex];
 
     if (!birthday) {
@@ -43,6 +49,10 @@ Page({
     }
     if (!occupation) {
       wx.showToast({ title: '请选择职业', icon: 'none' });
+      return;
+    }
+    if (!agreed) {
+      wx.showToast({ title: '请先阅读并同意用户协议', icon: 'none' });
       return;
     }
 
@@ -68,7 +78,7 @@ Page({
         avatarUrl: cloudAvatarUrl,
         birthday,
         gender,
-        occupation       // 新增职业字段
+        occupation
       }
     }).then(res => {
       wx.hideLoading();
@@ -82,5 +92,10 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: '网络错误', icon: 'none' });
     });
+  },
+
+  // 跳转到用户协议页面（如需，可自行实现）
+  showAgreement() {
+    wx.navigateTo({ url: '/pages/agreement/agreement' });
   }
 });
