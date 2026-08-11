@@ -1,19 +1,23 @@
 const cloud = require('wx-server-sdk');
-cloud.init({env:'cloud1-d3gqpcznd38f2891a'});
+cloud.init({ env: 'cloud1-d3gqpcznd38f2891a' });
 const db = cloud.database();
+const _ = db.command;
 
-exports.main = async(event, context) =>{
+exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
-  
+
   try {
     const res = await db.collection('notifications')
-      .where({
-        recipient: openid,
-        read: false
-      })
+      .where(_.and([
+        _.or([
+          { recipient: openid },
+          { userId: openid }
+        ]),
+        { read: false }
+      ]))
       .count();
-    
+
     return {
       code: 0,
       count: res.total
@@ -26,4 +30,4 @@ exports.main = async(event, context) =>{
       msg: '获取未读数量失败'
     };
   }
-}
+};

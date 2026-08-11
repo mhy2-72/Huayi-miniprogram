@@ -27,19 +27,21 @@ Page({
   },
 
   async getUnreadCount(){
+    // 该方法不再用于设置tabBar红点，红点已移至“我的”页面
     try{
       const res = await wx.cloud.callFunction({name:'getUnreadCount'});
       const count = res.result.count || 0;
-      if (count>0){
-        wx.setTabBarBadge({
-          index:1,
-          text:count>99?'99+':count.toString()
-        });
-      }else{
-        wx.removeTabBarBadge({
-          index:1
-        });
-      }
+      // 不再显示tabBar徽标
+      // if (count>0){
+      //   wx.setTabBarBadge({
+      //     index:1,
+      //     text:count>99?'99+':count.toString()
+      //   });
+      // }else{
+      //   wx.removeTabBarBadge({
+      //     index:1
+      //   });
+      // }
     }catch(e){
       console.error('获取未读数量失败:',e);
     }
@@ -208,10 +210,11 @@ Page({
       });
       if (res.result.code === 0){
         //发送任务已接通知
-        await this.sendNotification(taskId,'accspted');
+        await this.sendNotification(taskId,'accepted');
         wx.showToast({title:'已接取'});
         this.loadData();
-        this.getUnreadCount();
+        // 红点已移至“我的”页面，不再调用 getUnreadCount
+        // this.getUnreadCount();
       }else{
         wx.showToast({title:res.result.msg,icon:'none)'});
       }

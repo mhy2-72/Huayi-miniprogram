@@ -180,6 +180,7 @@ Page({
 
   setRating(e) { this.setData({ rating: e.currentTarget.dataset.val }); },
 
+  // ========== 老人确认完成（先刷新任务，再发通知） ==========
   async confirmComplete() {
     const { task, rating } = this.data;
     wx.showModal({
@@ -193,9 +194,11 @@ Page({
             data: { taskId: task._id, rating } 
           });
           if (res.result.code === 0) { 
+            // 先刷新任务数据（此时积分已更新）
+            await this.loadTaskDetail(task._id);
+            // 再发送通知，携带最新的积分
             await this.sendNotification('completed');
             wx.showToast({ title: '评价成功' }); 
-            this.loadTaskDetail(task._id); 
           } else {
             wx.showToast({ title: res.result.msg, icon: 'none' });
           }
@@ -206,6 +209,7 @@ Page({
     });
   },
 
+  // ========== 老人取消任务 ==========
   cancel() {
     wx.showModal({
       title: '取消任务', 
@@ -221,9 +225,9 @@ Page({
             } 
           });
           if (res.result.code === 0) {
+            await this.loadTaskDetail(this.data.task._id);
             await this.sendNotification('cancelled');
             wx.showToast({ title: '已取消' }); 
-            this.loadTaskDetail(this.data.task._id); 
           } else {
             wx.showToast({ title: res.result.msg, icon: 'none' });
           }
@@ -234,6 +238,7 @@ Page({
     });
   },
 
+  // ========== 年轻人取消接取 ==========
   cancelAccept() {
     wx.showModal({
       title: '取消接取', 
@@ -249,9 +254,9 @@ Page({
             } 
           });
           if (res.result.code === 0) {
+            await this.loadTaskDetail(this.data.task._id);
             await this.sendNotification('youth_cancelled');
             wx.showToast({ title: '已取消接取' }); 
-            this.loadTaskDetail(this.data.task._id); 
           } else {
             wx.showToast({ title: res.result.msg, icon: 'none' });
           }

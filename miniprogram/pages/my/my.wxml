@@ -13,15 +13,25 @@
   </view>
 
   <view class="menu-list">
-    <view class="menu-item" bindtap="goNotifications">通知中心</view>
+    <!-- 通知中心（带红点） -->
+    <view class="menu-item" bindtap="goNotifications">
+      <text>通知中心</text>
+      <view wx:if="{{unreadCount > 0}}" class="red-dot">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
+    </view>
     <view class="menu-item" bindtap="goPointHistory">积分变动记录</view>
     <view class="menu-item" bindtap="goAbout">关于我们</view>
+  </view>
+  
+  <!-- 助老版AI入口（仅老人可见） -->
+  <view wx:if="{{userInfo.role === 'elder'}}" class="ai-section">
+    <button class="ai-btn" bindtap="goAIChat">AI语音助手(demo)</button>
   </view>
   
   <view class="logout-section">
     <button class="logout-btn" bindtap="deleteAccount">注销账号</button>
   </view>
-</view>
 
-<!-- 这是那个测试按钮 -->
-<button type="primary" style="width:320rpx;margin-top:20rpx;margin:0 auto" bindtap="handleTestSubscribe">测试订阅授权</button>
+  <view class="subscribe-section">
+    <button class="subscribe-btn" bindtap="Subscribe">订阅通知</button>
+  </view>
+</view>

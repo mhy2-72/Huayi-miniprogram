@@ -41,12 +41,7 @@
               </view>
               <button class="accept-btn" catchtap="accept" data-id="{{item._id}}">接取</button>
             </view>
-            <!-- 老人附图缩略图 -->
-            <view wx:if="{{item.imageUrls && item.imageUrls.length}}" class="thumb-list">
-              <image wx:for="{{item.imageUrls}}" wx:for-item="img" wx:key="index" 
-                     class="thumb-img" src="{{img}}" mode="aspectFill"
-                     catchtap="previewImage" data-url="{{img}}" data-urls="{{item.imageUrls}}"></image>
-            </view>
+            <!-- 老人附图缩略图已移除，未接取者不应看到 -->
           </view>
         </block>
         <view wx:if="{{!published.length}}" class="empty">暂无可接任务</view>

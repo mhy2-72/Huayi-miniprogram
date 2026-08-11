@@ -1,0 +1,37 @@
+<view class="container">
+  <!-- 顶部语音控制按钮 -->
+  <view class="voice-toggle" bindtap="toggleSound">
+    <image src="{{isSoundOn ? '/images/sound.png' : '/images/mute.png'}}" mode="aspectFit" class="voice-icon"></image>
+  </view>
+
+  <!-- 消息列表（为空时显示使用提示） -->
+  <scroll-view class="chat-list" scroll-y scroll-into-view="{{scrollToView}}" enhanced>
+    <block wx:if="{{messages.length === 0}}">
+      <view class="usage-tip">
+        <text class="tip-title">💡 使用提示</text>
+        <text class="tip-item">发布任务：任务名</text>
+        <text class="tip-item">查询任务：任务名</text>
+        <text class="tip-item">评价任务：任务名为x星</text>
+        <text class="tip-item">取消任务：任务名</text>
+        <text class="tip-desc">您也可以直接和我聊天哦～</text>
+      </view>
+    </block>
+
+    <view wx:for="{{messages}}" wx:key="_id" id="msg-{{index}}" class="msg-item {{item.sender === 'user' ? 'user-msg' : 'ai-msg'}}">
+      <text>{{item.text}}</text>
+      <!-- 手动播放按钮（仅AI回复有语音且声音关闭时显示） -->
+      <view wx:if="{{item.sender === 'ai' && item.voiceFileID && !isSoundOn}}" class="play-btn" bindtap="playVoice" data-fileid="{{item.voiceFileID}}">🔊</view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部输入区域 -->
+  <view class="input-area">
+    <input class="text-input" 
+           placeholder="输入您的问题或指令" 
+           value="{{inputText}}" 
+           bindinput="onInput" 
+           confirm-type="send" 
+           bindconfirm="sendMessage"/>
+    <button class="send-btn {{inputText.trim() ? 'active' : ''}}" bindtap="sendMessage">发送</button>
+  </view>
+</view>

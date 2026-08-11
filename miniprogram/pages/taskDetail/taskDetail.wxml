@@ -66,8 +66,8 @@
       <text class="value cancel-reason">{{task.cancelReason}}</text>
     </view>
 
-    <!-- 任务附图（仅接取后年轻人可见） -->
-    <view wx:if="{{role === 'youth' && task.youthId === myOpenid && task.status !== 'published' && task.imageUrls && task.imageUrls.length}}">
+    <!-- 任务附图（发布者始终可见，接取者接取后可见） -->
+    <view wx:if="{{task.imageUrls && task.imageUrls.length && ((role === 'elder' && task.elderId === myOpenid) || (role === 'youth' && task.youthId === myOpenid && task.status !== 'published'))}}">
       <text class="label">任务附图</text>
       <view class="img-list">
         <image wx:for="{{task.imageUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>

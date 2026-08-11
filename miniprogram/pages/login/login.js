@@ -74,8 +74,14 @@ Page({
     this.checkUser();
   },
 
+  //进入AIChat界面
+  goAIChat() {
+    wx.navigateTo({ url: '/pages/aichat/aichat' });
+  },
+  
   // 跳转用户协议页面
   showAgreement() {
     wx.navigateTo({ url: '/pages/agreement/agreement' });
   }
+
 });

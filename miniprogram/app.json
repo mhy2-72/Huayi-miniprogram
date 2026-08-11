@@ -10,7 +10,8 @@
     "pages/my/my",
     "pages/notifications/notifications",
     "pages/pointHistory/pointHistory",
-    "pages/agreement/agreement"
+    "pages/agreement/agreement",
+    "pages/aichat/aichat"
   ],
   "window": {
     "backgroundTextStyle": "light",

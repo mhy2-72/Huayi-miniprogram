@@ -3,7 +3,8 @@ const app = getApp();
 Page({
   data: {
     userInfo: {},
-    roleText: ''
+    roleText: '',
+    unreadCount: 0   // 新增未读通知计数
   },
 
   onLoad() {
@@ -12,6 +13,7 @@ Page({
 
   onShow() {
     this.loadUserInfo();
+    this.loadUnreadCount();   // 每次显示页面时获取未读数量
   },
 
   loadUserInfo() {
@@ -36,6 +38,17 @@ Page({
     }
   },
 
+  // 获取未读通知数量
+  async loadUnreadCount() {
+    try {
+      const res = await wx.cloud.callFunction({ name: 'getUnreadCount' });
+      const count = res.result.count || 0;
+      this.setData({ unreadCount: count });
+    } catch (e) {
+      console.error('获取未读数量失败', e);
+    }
+  },
+
   goNotifications() {
     wx.navigateTo({ url: '/pages/notifications/notifications' });
   },
@@ -50,6 +63,23 @@ Page({
       content: '申出圆手互助平台，让邻里互助更温暖。',
       showCancel: false
     });
+  },
+
+  // 进入AI语音助手页面
+  goAIChat() {
+    wx.navigateTo({ url: '/pages/aichat/aichat' });
+  },
+
+  Subscribe() {
+    wx.requestSubscribeMessage({
+      tmplIds: ['5-rezkv5Ou5ph7UMnVjUX2gVZAg4VFgW-5_c137PrX0'], 
+      success(res) { 
+        console.log('用户允许了订阅', res);
+      },
+      fail(err) { 
+        console.log('用户拒绝了或报错', err);
+      }
+    })
   },
 
   deleteAccount() {

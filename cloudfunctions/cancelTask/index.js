@@ -19,6 +19,11 @@ exports.main = async (event, context) => {
     return { code: 0, msg: '任务已取消' };
   }
 
+  // 禁止取消待评价（submitted）的任务
+  if (isElder && task.data.status === 'submitted') {
+    return { code: -1, msg: '任务已完成，禁止取消，请评价任务！' };
+  }
+
   // 年轻人取消接取 (accepted)
   if (isYouth && task.data.status === 'accepted') {
     const createTime = new Date(task.data.createTime);

@@ -10,9 +10,14 @@
     <button class="register-btn" bindtap="goRegister">注册新账号</button>
   </block>
   <block wx:else>
-    <text class="hint">欢迎回来，{{userInfo.nickName}} {{greeting}}</text>
-    <button class="enter-btn" bindtap="goHome">进入首页</button>
-  </block>
+  <text class="hint">欢迎回来，{{userInfo.nickName}} {{greeting}}</text>
+  <button class="enter-btn" bindtap="goHome">进入首页</button>
+  <!-- 新增AI体验按钮（仅老人端） -->
+  <button wx:if="{{userInfo && userInfo.role === 'elder'}}" 
+        class="ai-btn" 
+        bindtap="goAIChat">AI语音助手(demo)</button>
+</block>
+
 
   <button wx:if="{{!isChecking && error}}" bindtap="retry" class="retry-btn">网络错误，点击重试</button>
 
