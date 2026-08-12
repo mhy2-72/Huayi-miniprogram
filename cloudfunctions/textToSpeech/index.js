@@ -25,7 +25,7 @@ exports.main = async (event) => {
   const params = {
     Text: text,
     SessionId: `session_${Date.now()}`,
-    VoiceType: 1002,   // 亲切女声，可按需更换
+    VoiceType: 1002,
     Codec: 'mp3',
     Volume: 5,
     Speed: 0
@@ -41,6 +41,16 @@ exports.main = async (event) => {
     const uploadRes = await cloud.uploadFile({
       cloudPath,
       fileContent: audioBuffer
+    });
+
+    // 记录 TTS 文件，以便注销时清理
+    const wxContext = cloud.getWXContext();
+    await cloud.database().collection('ttsFiles').add({
+      data: {
+        userId: wxContext.OPENID,
+        fileID: uploadRes.fileID,
+        createTime: new Date()
+      }
     });
 
     return { fileID: uploadRes.fileID };

@@ -5,7 +5,7 @@ Page({
     birthday: '',
     gender: 'male',
     occupationIndex: 0,
-    occupations: ['退休', '教师', '医护人员', '工人', '公务员', '自由职业', '其他'],
+    occupations: ['退休', '教师', '医护人员', '工人', '公务员', '自由职业', '其他','工程师','心理咨询师','律师','记者','消防员','社区工作者','学生'],
     today: new Date().toISOString().slice(0, 10),
     genders: [
       { value: 'male', label: '男' },

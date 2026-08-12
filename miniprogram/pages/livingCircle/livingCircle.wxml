@@ -1,0 +1,40 @@
+<!-- pages/livingCircle/livingCircle.wxml -->
+<view class="container">
+  <!-- 搜索输入框 -->
+  <view class="search-bar">
+    <input class="search-input" placeholder="输入需求，如：哪里有药店"
+           value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search"/>
+  </view>
+
+  <!-- 分类按钮（横向滚动） -->
+  <scroll-view scroll-x class="category-bar" enhanced show-scrollbar="{{false}}">
+    <view class="category-btn {{selectedCategory === item.key ? 'active' : ''}}"
+          wx:for="{{categories}}" wx:key="key"
+          bindtap="onCategoryTap" data-key="{{item.key}}">{{item.name}}</view>
+  </scroll-view>
+
+  <!-- 无匹配提示 -->
+  <view wx:if="{{tip}}" class="tip">{{tip}}</view>
+
+  <!-- 结果列表 -->
+  <view class="result-list">
+    <view wx:for="{{list}}" wx:key="id" class="poi-card {{index === 0 ? 'best' : ''}}"
+          bindtap="openLocation" data-poi="{{item}}">
+      <view class="poi-head">
+        <text class="poi-name">{{item.name}}</text>
+        <text wx:if="{{index === 0}}" class="best-tag">⭐最优推荐</text>
+      </view>
+      <view class="poi-meta">
+        <text class="poi-cat">{{item.categoryName}}</text>
+        <text class="poi-dist">{{item.distanceText}}</text>
+      </view>
+      <view class="poi-addr">{{item.address}}</view>
+      <view class="poi-foot">
+        <text>★ {{item.rating}}</text>
+        <text class="poi-phone">{{item.phone}}</text>
+        <text class="nav-hint">点击导航 ›</text>
+      </view>
+    </view>
+    <view wx:if="{{!list.length}}" class="empty">暂无相关服务</view>
+  </view>
+</view>

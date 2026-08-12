@@ -27,7 +27,11 @@ exports.main = async (event, context) => {
   const age = parseAge(birthday);
   if (age < 0 || age > 150) return { code: -1, msg: '出生日期不合法' };
 
-  const role = age >= 55 ? 'elder' : 'youth';
+  const role='';
+  if ( age >= 12 && age <= 17 ) role = 'teen';
+  else if ( age >= 18 && age <= 35 ) role = 'young';
+  else if ( age >= 36 && age <= 59 ) role = 'middle';
+  else if ( age >=60 ) role = 'elder';
 
   await db.collection('users').add({
     data: {

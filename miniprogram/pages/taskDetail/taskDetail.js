@@ -70,14 +70,33 @@ Page({
 
       if (task) {
         const db = wx.cloud.database();
-        const elderPromise = db.collection('users').doc(task.elderId).get();
-        const youthPromise = task.youthId
-          ? db.collection('users').doc(task.youthId).get()
-          : Promise.resolve(null);
 
-        const [elderRes, youthRes] = await Promise.all([elderPromise, youthPromise]);
-        const elderInfo = elderRes.data;
-        const youthInfo = youthRes ? youthRes.data : null;
+        // 获取发布者信息，若不存在则标记为已注销
+        let elderInfo = null;
+        if (task.elderId) {
+          try {
+            const elderRes = await db.collection('users').doc(task.elderId).get();
+            elderInfo = elderRes.data;
+          } catch (e) {
+            elderInfo = { nickName: '账号已注销', deleted: true };
+          }
+        } else {
+          elderInfo = { nickName: '账号已注销', deleted: true };
+        }
+
+        // 获取接取者信息，区分未接取和已注销
+        let youthInfo = null;
+        if (task.youthId) {
+          try {
+            const youthRes = await db.collection('users').doc(task.youthId).get();
+            youthInfo = youthRes.data;
+          } catch (e) {
+            youthInfo = { nickName: '账号已注销', deleted: true };
+          }
+        } else {
+          youthInfo = null; // 未接取
+        }
+
         const youthNickName = youthInfo ? youthInfo.nickName : '年轻人';
 
         const processed = await this.processTask(task, youthNickName);

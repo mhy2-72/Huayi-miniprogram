@@ -196,6 +196,10 @@ Page({
     wx.navigateTo({ url: '/pages/publish/publish' });
   },
 
+  goLivingCircle() {
+    wx.navigateTo({ url: '/pages/livingCircle/livingCircle' });
+  },
+  
   goDetail(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: `/pages/taskDetail/taskDetail?id=${id}` });

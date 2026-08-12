@@ -33,11 +33,12 @@ Page({
   getRoleText(role, gender) {
     if (role === 'elder') {
       return gender === 'male' ? '爷爷' : '奶奶';
-    } else {
+    } else if (role === 'young' || 'middle') {
       return gender === 'male' ? '先生' : '女士';
+    }else if (role === 'teen'){
+      return gender === 'male' ? '少年' : '少女';
     }
   },
-
   // 获取未读通知数量
   async loadUnreadCount() {
     try {

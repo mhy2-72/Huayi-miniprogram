@@ -8,15 +8,23 @@
     <view class="participants">
       <view class="participant">
         <image src="{{elderInfo.avatarUrl || '/images/default-avatar.png'}}" class="participant-avatar"></image>
-        <text class="participant-name">{{elderInfo.nickName}}</text>
-        <text class="participant-role">发布方</text>
+        <text class="participant-name">{{elderInfo.nickName || '未知'}}</text>
+        <text wx:if="{{elderInfo.deleted}}" class="deleted-tip">已注销</text>
+        <text wx:else class="participant-role">发布方</text>
       </view>
       <text class="divider">|</text>
       <view class="participant">
-        <image wx:if="{{youthInfo}}" src="{{youthInfo.avatarUrl || '/images/default-avatar.png'}}" class="participant-avatar"></image>
-        <text wx:if="{{youthInfo}}" class="participant-name">{{youthInfo.nickName}}</text>
-        <text wx:else class="participant-name">暂无接取方</text>
-        <text class="participant-role">接取方</text>
+        <block wx:if="{{youthInfo}}">
+          <image src="{{youthInfo.avatarUrl || '/images/default-avatar.png'}}" class="participant-avatar"></image>
+          <text class="participant-name">{{youthInfo.nickName || '未知'}}</text>
+          <text wx:if="{{youthInfo.deleted}}" class="deleted-tip">已注销</text>
+          <text wx:else class="participant-role">接取方</text>
+        </block>
+        <block wx:else>
+          <image src="/images/default-avatar.png" class="participant-avatar"></image>
+          <text class="participant-name">暂无接取方</text>
+          <text class="participant-role">接取方</text>
+        </block>
       </view>
     </view>
 

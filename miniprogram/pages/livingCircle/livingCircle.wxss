@@ -1,0 +1,107 @@
+/* pages/livingCircle/livingCircle.wxss */
+.container {
+  min-height: 100vh;
+  background: #f6f6f6;
+}
+.search-bar {
+  padding: 20rpx 24rpx;
+  background: #fff;
+}
+.search-input {
+  height: 72rpx;
+  line-height: 72rpx;
+  background: #f2f3f5;
+  border-radius: 36rpx;
+  padding: 0 32rpx;
+  font-size: 28rpx;
+}
+.category-bar {
+  white-space: nowrap;
+  background: #fff;
+  padding: 10rpx 24rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.category-btn {
+  display: inline-block;
+  margin-right: 16rpx;
+  padding: 12rpx 32rpx;
+  background: #f2f3f5;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.category-btn.active {
+  background: #07c160;
+  color: #fff;
+}
+.tip {
+  padding: 20rpx 24rpx;
+  color: #e6a23c;
+  font-size: 26rpx;
+  background: #fdf6ec;
+}
+.result-list {
+  padding: 20rpx 24rpx;
+}
+.poi-card {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+}
+.poi-card.best {
+  border: 2rpx solid #07c160;
+}
+.poi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.poi-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  flex: 1;
+}
+.best-tag {
+  font-size: 22rpx;
+  color: #e6a23c;
+  border: 1rpx solid #e6a23c;
+  border-radius: 6rpx;
+  padding: 4rpx 12rpx;
+}
+.poi-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12rpx;
+  font-size: 26rpx;
+}
+.poi-cat {
+  color: #07c160;
+}
+.poi-dist {
+  color: #999;
+}
+.poi-addr {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+.poi-foot {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+.poi-phone {
+  margin-left: 24rpx;
+}
+.nav-hint {
+  margin-left: auto;
+  color: #07c160;
+}
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 60rpx 0;
+}

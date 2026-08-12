@@ -4,6 +4,16 @@
 
   <!-- 数据加载完成后显示正常内容 -->
   <block wx:else>
+    <!-- 生活圈服务入口 -->
+    <view class="living-circle-entry" bindtap="goLivingCircle">
+      <text class="lc-icon">🏘️</text>
+      <view class="lc-text">
+        <text class="lc-title">生活圈服务</text>
+        <text class="lc-sub">查找附近买菜、买药、银行等服务</text>
+      </view>
+      <text class="lc-arrow">›</text>
+    </view>
+    
     <!-- 老人端 -->
     <view wx:if="{{role === 'elder'}}" class="elder-panel">
       <button class="publish-btn" bindtap="goPublish">＋ 发布新任务</button>

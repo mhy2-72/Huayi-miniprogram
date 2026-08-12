@@ -1,3 +1,4 @@
+<!-- pages/publish/publish.wxml -->
 <view class="container">
   <textarea placeholder="请描述您的需求..." 
             bindinput="onDescriptionInput" 
@@ -15,5 +16,48 @@
     </view>
   </view>
 
-  <button bindtap="submit" class="submit-btn">发布任务</button>
+  <button bindtap="submit" class="submit-btn" disabled="{{!canPublish}}">发布任务</button>
+</view>
+
+<!-- ✅ 资质认证弹窗 -->
+<view class="modal-mask" wx:if="{{showCertModal}}" catchtap="closeCertModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">📋 资质认证</text>
+      <text class="modal-close" bindtap="closeCertModal">✕</text>
+    </view>
+    
+    <view class="modal-body">
+      <view class="cert-tip">
+        <text class="tip-icon">⚠️</text>
+        <text class="tip-text">该任务涉及专业领域，需要上传相关资质证明</text>
+      </view>
+      
+      <view class="cert-types">
+        <text class="types-label">需要的资质类型：</text>
+        <view class="types-tags">
+          <text class="tag" wx:for="{{certTypes}}" wx:key="index">{{item}}</text>
+        </view>
+      </view>
+      
+      <view class="cert-upload-section">
+        <text class="cert-label">上传资质证明（请上传清晰的证书/执照照片）</text>
+        <view class="cert-img-list">
+          <block wx:for="{{certificationImages}}" wx:key="index">
+            <view class="cert-img-wrapper">
+              <image src="{{item}}" mode="aspectFill" class="cert-img" bindtap="previewCertImage" data-url="{{item}}"></image>
+              <view class="delete-btn" bindtap="deleteCertImage" data-index="{{index}}">✕</view>
+            </view>
+          </block>
+          <view class="cert-add-btn" bindtap="chooseCertImage" wx:if="{{certificationImages.length < 3}}">＋</view>
+        </view>
+        <text class="cert-hint">支持 jpg/png 格式，最多3张</text>
+      </view>
+    </view>
+    
+    <view class="modal-footer">
+      <button class="cert-cancel-btn" bindtap="closeCertModal">取消发布</button>
+      <button class="cert-confirm-btn" bindtap="confirmCert">确认发布</button>
+    </view>
+  </view>
 </view>

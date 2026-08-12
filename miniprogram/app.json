@@ -11,6 +11,7 @@
     "pages/notifications/notifications",
     "pages/pointHistory/pointHistory",
     "pages/agreement/agreement",
+    "pages/livingCircle/livingCircle",
     "pages/aichat/aichat"
   ],
   "window": {

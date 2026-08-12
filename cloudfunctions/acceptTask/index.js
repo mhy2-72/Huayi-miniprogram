@@ -21,6 +21,15 @@ exports.main = async (event, context) => {
   const task = await db.collection('tasks').doc(taskId).get();
   if (task.data.status !== 'published') return { code: -1, msg: '任务已被接或取消' };
 
+  if(user.data.role ==='teen'&& (task.data.category!==a && task.data.category!==d)){
+    return {code:-1,msg:'前面的区域以后再来探索吧awa'}
+  }
+
+  if(user.data.role ==='elder'&& (task.data.category!==c && task.data.category!==e)){
+    return {code:-1,msg:'此任务仅年轻人可接取'}
+  }
+
+
   const acceptTime = new Date();
   // 不再修改 deadline，保持发布时设定的截止时间
 
