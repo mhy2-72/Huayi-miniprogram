@@ -15,9 +15,15 @@
     <image src="{{isSoundOn ? '/images/sound.png' : '/images/mute.png'}}" mode="aspectFit" class="voice-icon"></image>
   </view>
 
-  <!-- 角色图像 -->
+  <!-- 角色图像（双层层叠 + cross-fade，避免帧切换闪烁） -->
   <view class="character-container {{characterMoved ? 'moved' : ''}}">
-    <image class="character-img" src="{{characterSrc}}" mode="widthFix"></image>
+    <!-- 高度占位：保持容器高度不塌陷 -->
+    <image class="character-spacer" src="{{characterSrcA}}" mode="widthFix"></image>
+    <!-- 双层层叠 + cross-fade -->
+    <image class="character-img {{imgLayer === 'a' ? 'img-active' : 'img-inactive'}}" 
+           src="{{characterSrcA}}" mode="widthFix"></image>
+    <image class="character-img {{imgLayer === 'b' ? 'img-active' : 'img-inactive'}}" 
+           src="{{characterSrcB}}" mode="widthFix"></image>
   </view>
 
   <!-- 消息列表 -->
@@ -41,7 +47,7 @@
           class="task-card" bindtap="goTaskDetail" data-taskid="{{item.actionResult.taskId}}">
           <text class="card-title">📋 任务状态</text>
           <text class="card-name">{{item.actionResult.taskName}}</text>
-          <text class="card-tip">{{item.actionResult.reply}}</text>
+          <text class="card-tip">点击查看详情</text>
         </view>
       </view>
     </view>

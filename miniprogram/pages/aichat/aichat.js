@@ -1,25 +1,9 @@
-// pages/aichat/aichat.js
+// pages/aichatgif/aichatgif.js
 const app = getApp();
 
-// 云存储 fileID 列表（保持不变）
 const FILE_IDS = [
   'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/stick.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk01.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk02.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk03.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk04.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk05.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk06.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk07.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk08.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk09.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk10.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk11.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk12.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk13.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk14.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk15.png',
-  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk16.png'
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talkgif.gif'
 ];
 
 // 工具：下载文件并重试（最多 3 次）
@@ -62,11 +46,11 @@ Page({
     scrollToView: '',
     isSoundOn: true,
     characterMoved: false,
-    characterSrc: '',
+    characterSrcA: '',    // 静态图（stick）
+    characterSrcB: '',    // 动态图（gif）
+    imgLayer: 'a',        // 'a' = 显示静态，'b' = 显示GIF
     isSpeaking: false,
-    frameIndex: 0,
-    frameTimer: null,
-    imageMap: {}   // 存储本地路径（或降级云URL）
+    imageMap: {}          // 存储本地路径（或降级云URL）
   },
 
   async onLoad() {
@@ -78,11 +62,11 @@ Page({
       const urlMap = {};
       res.fileList.forEach(item => {
         const fullName = item.fileID.split('/').pop();
-        const fileName = fullName.replace('.png', '');
+        const fileName = fullName.replace(/\.(png|gif)$/, '');
         urlMap[fileName] = item.tempFileURL;
       });
 
-      // 2. 并发下载所有图片，每个最多重试 3 次
+      // 2. 并发下载图片到本地（最多重试 3 次）
       const downloadPromises = Object.keys(urlMap).map(async (key) => {
         const url = urlMap[key];
         try {
@@ -90,7 +74,7 @@ Page({
           return { key, localPath };
         } catch (err) {
           console.error(`下载 ${key} 最终失败，使用云临时 URL 降级`, err);
-          return { key, localPath: url }; // 降级使用云URL（极少发生）
+          return { key, localPath: url };
         }
       });
 
@@ -100,19 +84,37 @@ Page({
         localMap[key] = localPath;
       });
 
-      // 3. 保存映射，设置角色默认图
+      // 3. 预解码所有图片（强制内存缓存）
+      const preloadPromises = Object.values(localMap).map(path => {
+        return new Promise((resolve) => {
+          wx.getImageInfo({
+            src: path,
+            success: () => resolve(),
+            fail: () => resolve()
+          });
+        });
+      });
+      await Promise.all(preloadPromises);
+
+      // 4. 设置角色默认图（双层层叠，避免切换闪烁）
+      const stickUrl = localMap['stick'] || '/images/stick.png';
+      const gifUrl = localMap['talkgif'] || '/images/talkgif.gif';
       this.setData({
         imageMap: localMap,
-        characterSrc: localMap['stick'] || '/images/stick.png',
+        characterSrcA: stickUrl,
+        characterSrcB: gifUrl,
+        imgLayer: 'a',
         pageReady: true
       });
 
-      console.log('所有图片预加载完成（绝大部分为本地路径）');
+      console.log('GIF动画页面加载完成');
     } catch (err) {
       console.error('预加载失败', err);
-      // 完全降级
+      // 降级：使用本地资源
       this.setData({
-        characterSrc: '/images/stick.png',
+        characterSrcA: '/images/stick.png',
+        characterSrcB: '/images/talkgif.gif',
+        imgLayer: 'a',
         pageReady: true,
       });
       wx.showToast({ title: '图片加载失败，使用本地资源', icon: 'none' });
@@ -217,39 +219,16 @@ Page({
     });
   },
 
+  // ---- GIF 动画控制 ----
+  // 播放语音时切换到GIF层（B层），停止时切回静态层（A层）
   startFrameAnimation() {
     if (this.data.isSpeaking) return;
-    this.setData({ frameIndex: 0, isSpeaking: true });
-    this.updateFrameSrc(0);
-    const timer = setInterval(() => {
-      let next = (this.data.frameIndex + 1) % 16;
-      this.setData({ frameIndex: next });
-      this.updateFrameSrc(next);
-    }, 100);
-    this.setData({ frameTimer: timer });
+    this.setData({ isSpeaking: true, imgLayer: 'b' });
   },
 
   stopFrameAnimation() {
-    if (this.data.frameTimer) {
-      clearInterval(this.data.frameTimer);
-      this.setData({ frameTimer: null });
-    }
     if (this.data.isSpeaking) {
-      this.setData({ isSpeaking: false });
-      const stickUrl = this.data.imageMap['stick'] || '/images/stick.png';
-      this.setData({ characterSrc: stickUrl });
-    }
-  },
-
-  updateFrameSrc(index) {
-    const num = String(index + 1).padStart(2, '0');
-    const key = `talk${num}`;
-    const url = this.data.imageMap[key];
-    if (url) {
-      this.setData({ characterSrc: url });
-    } else {
-      // 极端降级
-      this.setData({ characterSrc: `/images/talk${num}.png` });
+      this.setData({ isSpeaking: false, imgLayer: 'a' });
     }
   },
 

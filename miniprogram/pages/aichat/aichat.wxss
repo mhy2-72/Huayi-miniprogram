@@ -138,10 +138,31 @@ button.send-btn.active {
   top: 20rpx;
   left: 20rpx;
   transform: none;
-  width: 25vw; /* 约为屏幕宽度的 1/4 */
+  width: 25vw;
+}
+.character-spacer {
+  width: 100%;
+  height: auto;
+  visibility: hidden;
+  display: block;
 }
 .character-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: auto;
   display: block;
+  will-change: opacity;
+  backface-visibility: hidden;
+  transition: opacity 0.06s ease-out;
+}
+.img-active {
+  opacity: 1;
+  z-index: 2;
+}
+.img-inactive {
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
 }
