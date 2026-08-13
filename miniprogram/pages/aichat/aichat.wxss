@@ -2,14 +2,14 @@
 .voice-toggle { position: absolute; top: 20rpx; right: 30rpx; z-index: 10; }
 .voice-icon { width: 40rpx; height: 40rpx; }
 .chat-list { flex: 1; padding: 20rpx; overflow-y: auto; padding-top: 80rpx; }
-.msg-item { max-width: 80%; margin-bottom: 20rpx; padding: 20rpx; border-radius: 16rpx; font-size: 30rpx; line-height: 1.6; }
+.msg-item { max-width: 80%; margin-bottom: 20rpx; padding: 20rpx; border-radius: 16rpx; font-size: 30rpx; line-height: 1.6; word-break: break-all; }
 .user-msg { align-self: flex-end; background: #95ec69; color: #000; }
 .ai-msg { align-self: flex-start; background: #fff; color: #333; }
 .play-btn { margin-top: 10rpx; font-size: 40rpx; display: inline-block; }
 
-/* 使用提示 */
+/* 使用提示（初始时角色占据上方，故加大 margin-top） */
 .usage-tip {
-  margin: 200rpx auto 0;
+  margin: 400rpx auto 0;
   padding: 40rpx;
   background: #fff;
   border-radius: 20rpx;
@@ -35,13 +35,14 @@ button.send-btn {
   text-align: center;
   border: none;
   padding: 0;
-  background-color: #07c160;
-  color: #fff;
+  background-color: #ccc;
+  color: #666;
 }
 button.send-btn.active {
   background-color: #07c160;
   color: #fff;
 }
+
 /* 任务卡片 */
 .task-card {
   margin-top: 20rpx;
@@ -67,4 +68,26 @@ button.send-btn.active {
   font-size: 26rpx;
   color: #999;
   align-self: flex-end;
+}
+
+/* ===== 角色样式 ===== */
+.character-container {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300rpx;
+  z-index: 10;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.character-container.moved {
+  top: 20rpx;
+  left: 20rpx;
+  transform: none;
+  width: 25vw;
+}
+.character-img {
+  width: 100%;
+  height: auto;
+  display: block;
 }

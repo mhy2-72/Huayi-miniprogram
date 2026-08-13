@@ -4,6 +4,11 @@
     <image src="{{isSoundOn ? '/images/sound.png' : '/images/mute.png'}}" mode="aspectFit" class="voice-icon"></image>
   </view>
 
+  <!-- 角色图像（固定位置） -->
+  <view class="character-container {{characterMoved ? 'moved' : ''}}">
+    <image class="character-img" src="{{characterSrc}}" mode="aspectFit"></image>
+  </view>
+
   <!-- 消息列表 -->
   <scroll-view class="chat-list" scroll-y scroll-into-view="{{scrollToView}}" enhanced>
     <block wx:if="{{messages.length === 0}}">
