@@ -4,7 +4,7 @@
     <image src="{{isSoundOn ? '/images/sound.png' : '/images/mute.png'}}" mode="aspectFit" class="voice-icon"></image>
   </view>
 
-  <!-- 消息列表（为空时显示使用提示） -->
+  <!-- 消息列表 -->
   <scroll-view class="chat-list" scroll-y scroll-into-view="{{scrollToView}}" enhanced>
     <block wx:if="{{messages.length === 0}}">
       <view class="usage-tip">
@@ -21,6 +21,14 @@
       <text>{{item.text}}</text>
       <!-- 手动播放按钮（仅AI回复有语音且声音关闭时显示） -->
       <view wx:if="{{item.sender === 'ai' && item.voiceFileID && !isSoundOn}}" class="play-btn" bindtap="playVoice" data-fileid="{{item.voiceFileID}}">🔊</view>
+      
+      <!-- 任务卡片（仅当发布任务成功时显示） -->
+      <view wx:if="{{item.sender === 'ai' && item.actionResult && item.actionResult.action === 'publish' && item.actionResult.code === 0}}" 
+            class="task-card" bindtap="goTaskDetail" data-taskid="{{item.actionResult.taskId}}">
+        <text class="card-title">📋 任务已发布</text>
+        <text class="card-name">{{item.actionResult.taskName || '未命名任务'}}</text>
+        <text class="card-tip">点击查看详情 →</text>
+      </view>
     </view>
   </scroll-view>
 

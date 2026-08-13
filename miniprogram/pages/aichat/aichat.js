@@ -1,3 +1,4 @@
+// pages/aichat/aichat.js
 const app = getApp();
 
 Page({
@@ -5,7 +6,7 @@ Page({
     messages: [],
     inputText: '',
     scrollToView: '',
-    isSoundOn: true   // 默认声音开启
+    isSoundOn: true
   },
 
   onInput(e) {
@@ -35,7 +36,14 @@ Page({
       });
       const aiText = res.result.reply || '服务出错，请稍后再试';
       const voiceFileID = res.result.voiceFileID || '';
-      const aiMsg = { _id: Date.now() + 'a', sender: 'ai', text: aiText, voiceFileID };
+      const actionResult = res.result.actionResult || null;
+      const aiMsg = {
+        _id: Date.now() + 'a',
+        sender: 'ai',
+        text: aiText,
+        voiceFileID,
+        actionResult: actionResult
+      };
       this.data.messages.push(aiMsg);
       this.setData({ messages: this.data.messages, scrollToView: 'msg-' + (this.data.messages.length - 1) });
 
@@ -58,5 +66,17 @@ Page({
       innerAudioContext.src = url;
       innerAudioContext.play();
     });
+  },
+
+  // 点击任务卡片跳转详情
+  goTaskDetail(e) {
+    const taskId = e.currentTarget.dataset.taskid;
+    if (taskId) {
+      wx.navigateTo({
+        url: `/pages/taskDetail/taskDetail?id=${taskId}`
+      });
+    } else {
+      wx.showToast({ title: '任务ID无效', icon: 'none' });
+    }
   }
 });

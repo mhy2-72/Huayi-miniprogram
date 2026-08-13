@@ -1,0 +1,9 @@
+{
+  "name": "cleanTTsfiles",
+  "version": "1.0.0",
+  "description": "每天凌晨2点清理TTS语音文件及记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
