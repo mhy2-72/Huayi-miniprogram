@@ -1,3 +1,4 @@
+//miniprogram\pages\register\register.js
 Page({
   data: {
     avatarUrl: '',

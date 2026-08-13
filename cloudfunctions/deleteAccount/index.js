@@ -40,7 +40,6 @@ exports.main = async (event, context) => {
   const ttsRecords = await db.collection('ttsFiles').where({ userId: openid }).get();
   if (ttsRecords.data.length > 0) {
     const fileIDs = ttsRecords.data.map(record => record.fileID);
-    // 分批删除云存储文件（每次最多50个）
     const BATCH_SIZE = 50;
     for (let i = 0; i < fileIDs.length; i += BATCH_SIZE) {
       const batch = fileIDs.slice(i, i + BATCH_SIZE);
@@ -48,11 +47,25 @@ exports.main = async (event, context) => {
         console.error('删除TTS文件失败', err);
       });
     }
-    // 删除数据库中的记录
     await db.collection('ttsFiles').where({ userId: openid }).remove();
   }
 
-  // 不再将 tasks 中的 elderId/youthId 设为 null，保留原值以便前端显示“账号已注销”
+  // 更新任务中的用户ID为 'accountDeleted'，保留任务数据供前端展示注销状态
+  try {
+    if (user.role === 'elder') {
+      await db.collection('tasks').where({ elderId: openid }).update({
+        data: { elderId: 'accountDeleted' }
+      });
+    } else if (user.role === 'youth') {
+      await db.collection('tasks').where({ youthId: openid }).update({
+        data: { youthId: 'accountDeleted' }
+      });
+    }
+    // 若角色为其他，可忽略或按需扩展
+  } catch (e) {
+    console.error('更新任务中的用户ID失败:', e);
+    // 更新失败不影响注销流程
+  }
 
   // 记录注销日志
   await db.collection('deletionLogs').add({

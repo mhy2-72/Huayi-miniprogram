@@ -1,44 +1,41 @@
-//cloudfunctions\acceptTask\index.js
+// cloudfunctions/AIpublishTask/index.js
 const cloud = require('wx-server-sdk');
 cloud.init();
 const db = cloud.database();
 
 exports.main = async (event, context) => {
-  const wxContext = cloud.getWXContext();
-  const youthId = wxContext.OPENID;
-  const { taskId } = event;
+  const { openid, taskName } = event;
+  if (!openid || !taskName) return { code: -1, reply: '参数错误' };
 
-  const user = await db.collection('users').doc(youthId).get();
-  if (user.data.role !== 'youth') return { code: -1, msg: '仅年轻人可接' };
+  const user = await db.collection('users').doc(openid).get();
+  // 仅禁止 teen 发布，其他角色均可
+  if (user.data.role === 'teen') return { code: -1, reply: '青少年不可发布任务' };
 
-  // 并发限制改为 1
   const activeCount = await db.collection('tasks').where({
-    youthId,
-    status: 'accepted'
+    elderId: openid,
+    status: db.command.in(['published', 'accepted', 'submitted'])
   }).count();
-  if (activeCount.total >= 1) return { code: -1, msg: '您已有进行中任务' };
+  if (activeCount.total >= 1) return { code: -1, reply: '您已有未完成的任务，请先处理' };
 
-  const task = await db.collection('tasks').doc(taskId).get();
-  if (task.data.status !== 'published') return { code: -1, msg: '任务已被接或取消' };
+  const now = new Date();
+  const deadline = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
-  if(user.data.role ==='teen'&& (task.data.category!==a && task.data.category!==d)){
-    return {code:-1,msg:'前面的区域以后再来探索吧awa'}
-  }
-
-  if(user.data.role ==='elder'&& (task.data.category!==c && task.data.category!==e)){
-    return {code:-1,msg:'此任务仅年轻人可接取'}
-  }
-
-
-  const acceptTime = new Date();
-  // 不再修改 deadline，保持发布时设定的截止时间
-
-  await db.collection('tasks').doc(taskId).update({
+  await db.collection('tasks').add({
     data: {
-      youthId,
-      status: 'accepted',
-      acceptTime
+      elderId: openid,
+      youthId: null,
+      description: taskName,
+      status: 'published',
+      createTime: now,
+      deadline,
+      difficulty: 2,
+      images: [],
+      evidenceImages: [],
+      submitNote: '',
+      rating: 0,
+      elderPoints: 0,
+      youthPoints: 0
     }
   });
-  return { code: 0, msg: '接取成功' };
+  return { code: 0, reply: `任务“${taskName}”已发布` };
 };

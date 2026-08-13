@@ -1,9 +1,10 @@
+// pages/taskDetail/taskDetail.js
 const app = getApp();
 
 Page({
   data: {
     task: null,
-    loading: true,          // 控制加载状态
+    loading: true,
     role: '',
     myOpenid: '',
     rating: 5,
@@ -51,7 +52,7 @@ Page({
       const data = res.result;
       let task = null;
 
-      if (data.role === 'elder') {
+      if (data.role !== 'teen') {
         task = data.tasks.find(t => t._id === taskId);
       } else {
         task = data.published.find(t => t._id === taskId) ||
@@ -71,7 +72,6 @@ Page({
       if (task) {
         const db = wx.cloud.database();
 
-        // 获取发布者信息，若不存在则标记为已注销
         let elderInfo = null;
         if (task.elderId) {
           try {
@@ -84,7 +84,6 @@ Page({
           elderInfo = { nickName: '账号已注销', deleted: true };
         }
 
-        // 获取接取者信息，区分未接取和已注销
         let youthInfo = null;
         if (task.youthId) {
           try {
@@ -94,7 +93,7 @@ Page({
             youthInfo = { nickName: '账号已注销', deleted: true };
           }
         } else {
-          youthInfo = null; // 未接取
+          youthInfo = null;
         }
 
         const youthNickName = youthInfo ? youthInfo.nickName : '年轻人';
@@ -147,10 +146,8 @@ Page({
       }
     });
 
-    // 难度文本
     newTask.difficultyText = this.getDifficultyText(newTask.difficulty);
 
-    // 老人附图
     if (newTask.images?.length) {
       try {
         const r = await wx.cloud.getTempFileURL({ fileList: newTask.images });
@@ -162,7 +159,6 @@ Page({
       newTask.imageUrls = [];
     }
 
-    // 凭证图片
     if (newTask.evidenceImages?.length) {
       try {
         const r = await wx.cloud.getTempFileURL({ fileList: newTask.evidenceImages });
@@ -199,7 +195,6 @@ Page({
 
   setRating(e) { this.setData({ rating: e.currentTarget.dataset.val }); },
 
-  // ========== 老人确认完成（先刷新任务，再发通知） ==========
   async confirmComplete() {
     const { task, rating } = this.data;
     wx.showModal({
@@ -213,9 +208,7 @@ Page({
             data: { taskId: task._id, rating } 
           });
           if (res.result.code === 0) { 
-            // 先刷新任务数据（此时积分已更新）
             await this.loadTaskDetail(task._id);
-            // 再发送通知，携带最新的积分
             await this.sendNotification('completed');
             wx.showToast({ title: '评价成功' }); 
           } else {
@@ -228,7 +221,6 @@ Page({
     });
   },
 
-  // ========== 老人取消任务 ==========
   cancel() {
     wx.showModal({
       title: '取消任务', 
@@ -257,7 +249,6 @@ Page({
     });
   },
 
-  // ========== 年轻人取消接取 ==========
   cancelAccept() {
     wx.showModal({
       title: '取消接取', 

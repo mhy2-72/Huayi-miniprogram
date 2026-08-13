@@ -1,3 +1,4 @@
+//cloudfunctions\getUnreadCount\index.js
 const cloud = require('wx-server-sdk');
 cloud.init({ env: 'cloud1-d3gqpcznd38f2891a' });
 const db = cloud.database();

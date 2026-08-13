@@ -1,3 +1,4 @@
+// pages/submitEvidence/submitEvidence.js
 Page({
   data: {
     taskId: '',
@@ -59,7 +60,6 @@ Page({
       this.setData({ errorMsg: '网络错误' });
     }
   },
-    // 新增发送通知方法
   async sendNotification(taskId, type) {
     try {
       const res = await wx.cloud.callFunction({
@@ -67,23 +67,20 @@ Page({
       });
       const data = res.result;
       let task = null;
-      
-      if (data.role === 'elder') {
+      if (data.role !== 'teen') {
         task = data.tasks.find(t => t._id === taskId);
       } else {
         task = data.published.find(t => t._id === taskId) || 
                data.myActive.find(t => t._id === taskId);
       }
-    
       if (!task) return;
-    
       await wx.cloud.callFunction({
         name: 'sendTaskNotification',
         data: {
           taskId: taskId,
           type: type,
           taskData: {
-           _id: task._id,
+            _id: task._id,
             description: task.description,
             elderId: task.elderId,
             youthId: task.youthId

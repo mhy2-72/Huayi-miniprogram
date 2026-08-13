@@ -1,3 +1,4 @@
+<!-- pages/taskDetail/taskDetail.wxml -->
 <view class="container">
   <!-- 加载中 -->
   <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
@@ -75,7 +76,7 @@
     </view>
 
     <!-- 任务附图（发布者始终可见，接取者接取后可见） -->
-    <view wx:if="{{task.imageUrls && task.imageUrls.length && ((role === 'elder' && task.elderId === myOpenid) || (role === 'youth' && task.youthId === myOpenid && task.status !== 'published'))}}">
+    <view wx:if="{{task.imageUrls && task.imageUrls.length && ((task.elderId === myOpenid) || (task.youthId === myOpenid && task.status !== 'published'))}}">
       <text class="label">任务附图</text>
       <view class="img-list">
         <image wx:for="{{task.imageUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
@@ -95,8 +96,8 @@
       <text class="value">{{task.submitNote}}</text>
     </view>
 
-    <!-- 老人操作区 -->
-    <view wx:if="{{role === 'elder' && task.elderId === myOpenid}}" class="action-area">
+    <!-- 发布者操作区（取消任务、评价） -->
+    <view wx:if="{{task.elderId === myOpenid}}" class="action-area">
       <button wx:if="{{task.status === 'published'}}" bindtap="cancel" class="btn-cancel">取消任务</button>
       <view wx:if="{{task.status === 'submitted'}}" class="rating-area">
         <text class="rating-title">请评分</text>
@@ -107,8 +108,8 @@
       </view>
     </view>
 
-    <!-- 年轻人操作区 -->
-    <view wx:if="{{role === 'youth' && task.youthId === myOpenid}}" class="action-area">
+    <!-- 接取者操作区（取消接取、上传凭证） -->
+    <view wx:if="{{task.youthId === myOpenid}}" class="action-area">
       <button wx:if="{{task.status === 'accepted'}}" bindtap="cancelAccept" class="btn-cancel-accept">取消接取</button>
       <button wx:if="{{task.status === 'accepted'}}" bindtap="goSubmitEvidence" class="btn-submit">上传凭证</button>
     </view>

@@ -1,3 +1,4 @@
+//cloudfunctions\AIgetTaskByName\index.js
 const cloud = require('wx-server-sdk');
 cloud.init();
 const db = cloud.database();
@@ -12,15 +13,15 @@ const statusMap = {
 
 exports.main = async (event, context) => {
   const { openid, taskName } = event;
-  if (!openid || !taskName) return { reply: '参数错误' };
+  if (!openid || !taskName) return { code: -1, reply: '参数错误' };
 
   const tasks = await db.collection('tasks').where({
     elderId: openid,
     description: taskName
   }).get();
 
-  if (tasks.data.length === 0) return { reply: `未找到任务“${taskName}”` };
+  if (tasks.data.length === 0) return { code: -1, reply: `未找到任务“${taskName}”` };
   const task = tasks.data[0];
   const statusText = statusMap[task.status] || task.status;
-  return { reply: `任务“${taskName}”状态为“${statusText}”，请继续下一步操作！` };
+  return { code: 0, reply: `任务“${taskName}”状态为“${statusText}”，请继续下一步操作！` };
 };

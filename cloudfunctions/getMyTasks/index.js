@@ -1,3 +1,4 @@
+// cloudfunctions/getMyTasks/index.js
 const cloud = require('wx-server-sdk');
 cloud.init({env:'cloud1-d3gqpcznd38f2891a'})
 const db = cloud.database();
@@ -7,25 +8,25 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
   
-  let role = 'youth'; // 默认角色
+  let role = 'youth';
   try {
     const user = await db.collection('users').doc(openid).get();
     if (user.data && user.data.role) {
       role = user.data.role;
     }
   } catch (e) {
-    // 用户不存在，使用默认角色
     console.warn('用户不存在，使用默认角色: youth', e);
   }
 
-  if (role === 'elder') {
+  // 非 teen 用户作为发布者，返回自己发布的任务
+  if (role !== 'teen') {
     const tasks = await db.collection('tasks')
       .where({ elderId: openid })
       .orderBy('createTime', 'desc')
       .get();
-    return { role: 'elder', tasks: tasks.data };
+    return { role: role, tasks: tasks.data };
   } else {
-    // youth 角色
+    // teen 用户作为接取者，返回可接任务和自己接取的任务
     const published = await db.collection('tasks')
       .where({ status: 'published' })
       .orderBy('createTime', 'desc')

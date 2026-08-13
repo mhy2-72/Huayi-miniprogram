@@ -1,3 +1,4 @@
+<!-- pages/index/index.wxml -->
 <view class="container">
   <!-- 加载中提示 -->
   <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
@@ -14,8 +15,8 @@
       <text class="lc-arrow">›</text>
     </view>
     
-    <!-- 老人端 -->
-    <view wx:if="{{role === 'elder'}}" class="elder-panel">
+    <!-- 发布者面板（非 teen 均可发布） -->
+    <view wx:if="{{role !== 'teen'}}" class="elder-panel">
       <button class="publish-btn" bindtap="goPublish">＋ 发布新任务</button>
       <view class="task-list">
         <block wx:for="{{myTasks}}" wx:key="_id">
@@ -39,7 +40,7 @@
       </view>
     </view>
 
-    <!-- 年轻人端 -->
+    <!-- 接取者面板（teen 及未发布权限的用户） -->
     <view wx:else class="youth-panel">
       <view class="section-title">可接任务</view>
       <view class="task-list">
