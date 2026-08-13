@@ -27,11 +27,12 @@ exports.main = async (event, context) => {
   const age = parseAge(birthday);
   if (age < 0 || age > 150) return { code: -1, msg: '出生日期不合法' };
 
-  const role='';
-  if ( age >= 12 && age <= 17 ) role = 'teen';
-  else if ( age >= 18 && age <= 35 ) role = 'young';
-  else if ( age >= 36 && age <= 59 ) role = 'middle';
-  else if ( age >=60 ) role = 'elder';
+  let role = '';   // 修改点：使用 let 声明
+  if (age >= 12 && age <= 17) role = 'teen';
+  else if (age >= 18 && age <= 35) role = 'young';
+  else if (age >= 36 && age <= 59) role = 'middle';
+  else if (age >= 60) role = 'elder';
+  else role = 'young';  // 可选：处理未覆盖年龄段（如12岁以下），避免 role 为空
 
   await db.collection('users').add({
     data: {
