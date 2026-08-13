@@ -2,20 +2,76 @@
 .voice-toggle { position: absolute; top: 20rpx; right: 30rpx; z-index: 10; }
 .voice-icon { width: 40rpx; height: 40rpx; }
 .chat-list { flex: 1; padding: 20rpx; overflow-y: auto; padding-top: 80rpx; }
-.msg-item { max-width: 80%; margin-bottom: 20rpx; padding: 20rpx; border-radius: 16rpx; font-size: 30rpx; line-height: 1.6; word-break: break-all; }
+
+/* 加载遮罩层 */
+.loading-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #ddd;
+  border-top-color: #07c160;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading-text {
+  margin-top: 30rpx;
+  font-size: 30rpx;
+  color: #666;
+}
+
+/* ===== 消息列表：从底部排列 ===== */
+.msg-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;          /* 保证至少占满 scroll-view 可视区，使消息贴底 */
+  padding-top: 20rpx;
+}
+.msg-item {
+  max-width: 80%;
+  margin-bottom: 20rpx;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  word-break: break-all;
+}
 .user-msg { align-self: flex-end; background: #95ec69; color: #000; }
 .ai-msg { align-self: flex-start; background: #fff; color: #333; }
 .play-btn { margin-top: 10rpx; font-size: 40rpx; display: inline-block; }
 
-/* 使用提示（初始时角色占据上方，故加大 margin-top） */
+/* 使用提示 */
+.usage-tip-wrapper {
+  flex-shrink: 0;
+  padding: 0 20rpx 10rpx 20rpx;
+}
 .usage-tip {
-  margin: 400rpx auto 0;
-  padding: 40rpx;
+  padding: 30rpx 40rpx;
   background: #fff;
   border-radius: 20rpx;
-  width: 85%;
+  width: 100%;
   text-align: center;
   box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+  box-sizing: border-box;
 }
 .tip-title { font-size: 34rpx; font-weight: bold; color: #333; display: block; margin-bottom: 30rpx; }
 .tip-item { font-size: 28rpx; color: #666; display: block; margin-bottom: 15rpx; }
@@ -24,8 +80,6 @@
 /* 输入区域 */
 .input-area { padding: 20rpx; background: #fff; display: flex; align-items: center; border-top: 1rpx solid #eee; }
 .text-input { flex: 1; height: 80rpx; border: 1rpx solid #ddd; border-radius: 40rpx; padding: 0 30rpx; font-size: 30rpx; background: #f9f9f9; margin-right: 20rpx; }
-
-/* 发送按钮（修复样式优先级） */
 button.send-btn {
   width: 120rpx;
   height: 80rpx;
@@ -84,7 +138,7 @@ button.send-btn.active {
   top: 20rpx;
   left: 20rpx;
   transform: none;
-  width: 25vw;
+  width: 25vw; /* 约为屏幕宽度的 1/4 */
 }
 .character-img {
   width: 100%;

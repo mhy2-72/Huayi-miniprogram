@@ -8,8 +8,7 @@ exports.main = async (event, context) => {
   if (!openid || !taskName) return { code: -1, reply: '参数错误' };
 
   const user = await db.collection('users').doc(openid).get();
-  // 仅禁止 teen 发布，其他角色均可
-  if (user.data.role === 'teen') return { code: -1, reply: '青少年不可发布任务' };
+  if (user.data.role !== 'elder') return { code: -1, reply: '仅老人可发布任务' };
 
   const activeCount = await db.collection('tasks').where({
     elderId: openid,
@@ -20,7 +19,7 @@ exports.main = async (event, context) => {
   const now = new Date();
   const deadline = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
-  const result = await db.collection('tasks').add({
+  await db.collection('tasks').add({
     data: {
       elderId: openid,
       youthId: null,
@@ -37,11 +36,5 @@ exports.main = async (event, context) => {
       youthPoints: 0
     }
   });
-
-  return { 
-    code: 0, 
-    reply: `任务“${taskName}”已发布`, 
-    taskId: result._id, 
-    taskName: taskName 
-  };
+  return { code: 0, reply: `任务“${taskName}”已发布` };
 };

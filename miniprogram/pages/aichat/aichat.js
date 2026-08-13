@@ -1,18 +1,122 @@
 // pages/aichat/aichat.js
 const app = getApp();
 
+// 云存储 fileID 列表（保持不变）
+const FILE_IDS = [
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/stick.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk01.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk02.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk03.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk04.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk05.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk06.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk07.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk08.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk09.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk10.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk11.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk12.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk13.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk14.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk15.png',
+  'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/talk16.png'
+];
+
+// 工具：下载文件并重试（最多 3 次）
+function downloadFileWithRetry(url, retries = 3) {
+  return new Promise((resolve, reject) => {
+    const doDownload = (attempt) => {
+      wx.downloadFile({
+        url: url,
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.tempFilePath);
+          } else {
+            if (attempt < retries) {
+              console.warn(`下载失败，状态码 ${res.statusCode}，重试第 ${attempt+1} 次`);
+              doDownload(attempt + 1);
+            } else {
+              reject(new Error(`下载失败，状态码 ${res.statusCode}`));
+            }
+          }
+        },
+        fail: (err) => {
+          if (attempt < retries) {
+            console.warn(`下载失败，重试第 ${attempt+1} 次`, err);
+            doDownload(attempt + 1);
+          } else {
+            reject(err);
+          }
+        }
+      });
+    };
+    doDownload(1);
+  });
+}
+
 Page({
   data: {
     messages: [],
+    pageReady: false,
     inputText: '',
     scrollToView: '',
     isSoundOn: true,
-    // 角色相关
-    characterMoved: false,      // 是否已移动到左上角
-    characterSrc: '/images/stick.png', // 当前显示的图片
-    isSpeaking: false,          // 是否正在说话动画
-    frameIndex: 0,              // 当前帧索引（0-15）
-    frameTimer: null            // 定时器句柄
+    characterMoved: false,
+    characterSrc: '',
+    isSpeaking: false,
+    frameIndex: 0,
+    frameTimer: null,
+    imageMap: {}   // 存储本地路径（或降级云URL）
+  },
+
+  async onLoad() {
+    this.setData({ pageReady: false });
+
+    try {
+      // 1. 获取云临时 URL
+      const res = await wx.cloud.getTempFileURL({ fileList: FILE_IDS });
+      const urlMap = {};
+      res.fileList.forEach(item => {
+        const fullName = item.fileID.split('/').pop();
+        const fileName = fullName.replace('.png', '');
+        urlMap[fileName] = item.tempFileURL;
+      });
+
+      // 2. 并发下载所有图片，每个最多重试 3 次
+      const downloadPromises = Object.keys(urlMap).map(async (key) => {
+        const url = urlMap[key];
+        try {
+          const localPath = await downloadFileWithRetry(url, 3);
+          return { key, localPath };
+        } catch (err) {
+          console.error(`下载 ${key} 最终失败，使用云临时 URL 降级`, err);
+          return { key, localPath: url }; // 降级使用云URL（极少发生）
+        }
+      });
+
+      const results = await Promise.all(downloadPromises);
+      const localMap = {};
+      results.forEach(({ key, localPath }) => {
+        localMap[key] = localPath;
+      });
+
+      // 3. 保存映射，设置角色默认图
+      this.setData({
+        imageMap: localMap,
+        characterSrc: localMap['stick'] || '/images/stick.png',
+        pageReady: true
+      });
+
+      console.log('所有图片预加载完成（绝大部分为本地路径）');
+    } catch (err) {
+      console.error('预加载失败', err);
+      // 完全降级
+      this.setData({
+        characterSrc: '/images/stick.png',
+        pageReady: true,
+      });
+      wx.showToast({ title: '图片加载失败，使用本地资源', icon: 'none' });
+    }
   },
 
   onInput(e) {
@@ -20,7 +124,6 @@ Page({
   },
 
   toggleSound() {
-    // 关闭声音时停止当前语音和动画
     if (this.data.isSoundOn && this.audioContext) {
       this.audioContext.stop();
       this.stopFrameAnimation();
@@ -34,7 +137,6 @@ Page({
 
     this.setData({ inputText: '' });
 
-    // 用户发送第一条消息时，移动角色到左上角
     if (!this.data.characterMoved) {
       this.setData({ characterMoved: true });
     }
@@ -61,9 +163,7 @@ Page({
       this.data.messages.push(aiMsg);
       this.setData({ messages: this.data.messages, scrollToView: 'msg-' + (this.data.messages.length - 1) });
 
-      // 自动播放语音（仅当声音开启且有语音文件）
       if (voiceFileID && this.data.isSoundOn) {
-        // 直接调用播放，传递数据
         this.playVoice({ currentTarget: { dataset: { fileid: voiceFileID } } });
       }
     } catch (e) {
@@ -72,7 +172,6 @@ Page({
     }
   },
 
-  // 播放语音（手动点击或自动调用）
   playVoice(e) {
     const fileid = e.currentTarget.dataset.fileid;
     if (!fileid) {
@@ -80,7 +179,6 @@ Page({
       return;
     }
 
-    // 如果已有音频在播放，先停止
     if (this.audioContext) {
       this.audioContext.stop();
       this.audioContext.destroy();
@@ -94,12 +192,10 @@ Page({
       this.audioContext = innerAudioContext;
       innerAudioContext.src = url;
 
-      // 开始播放时启动帧动画
       innerAudioContext.onPlay(() => {
         this.startFrameAnimation();
       });
 
-      // 播放结束或停止时停止动画并恢复stick
       innerAudioContext.onEnded(() => {
         this.stopFrameAnimation();
         this.audioContext = null;
@@ -108,7 +204,6 @@ Page({
         this.stopFrameAnimation();
         this.audioContext = null;
       });
-      // 播放错误也需清理
       innerAudioContext.onError((err) => {
         console.error('音频播放错误', err);
         this.stopFrameAnimation();
@@ -122,14 +217,10 @@ Page({
     });
   },
 
-  // 开始帧动画（说话）
   startFrameAnimation() {
-    if (this.data.isSpeaking) return; // 防止重复启动
-    // 重置帧索引
+    if (this.data.isSpeaking) return;
     this.setData({ frameIndex: 0, isSpeaking: true });
-    // 立即显示第一帧
     this.updateFrameSrc(0);
-    // 启动定时器，每100ms切换一帧（16帧约1.6秒一个周期）
     const timer = setInterval(() => {
       let next = (this.data.frameIndex + 1) % 16;
       this.setData({ frameIndex: next });
@@ -138,7 +229,6 @@ Page({
     this.setData({ frameTimer: timer });
   },
 
-  // 停止帧动画（闭嘴）
   stopFrameAnimation() {
     if (this.data.frameTimer) {
       clearInterval(this.data.frameTimer);
@@ -146,18 +236,23 @@ Page({
     }
     if (this.data.isSpeaking) {
       this.setData({ isSpeaking: false });
-      // 恢复为stick
-      this.setData({ characterSrc: '/images/stick.png' });
+      const stickUrl = this.data.imageMap['stick'] || '/images/stick.png';
+      this.setData({ characterSrc: stickUrl });
     }
   },
 
-  // 更新帧图片
   updateFrameSrc(index) {
     const num = String(index + 1).padStart(2, '0');
-    this.setData({ characterSrc: `/images/talk${num}.png` });
+    const key = `talk${num}`;
+    const url = this.data.imageMap[key];
+    if (url) {
+      this.setData({ characterSrc: url });
+    } else {
+      // 极端降级
+      this.setData({ characterSrc: `/images/talk${num}.png` });
+    }
   },
 
-  // 点击任务卡片跳转
   goTaskDetail(e) {
     const taskId = e.currentTarget.dataset.taskid;
     if (taskId) {
@@ -169,7 +264,6 @@ Page({
     }
   },
 
-  // 页面卸载时清理资源
   onUnload() {
     if (this.audioContext) {
       this.audioContext.stop();

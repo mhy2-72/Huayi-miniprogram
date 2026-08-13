@@ -1,50 +1,73 @@
 <view class="container">
+
+<!-- 加载遮罩层 -->
+<view wx:if="{{!pageReady}}" class="loading-mask">
+  <view class="loading-content">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中，请稍后...</text>
+  </view>
+</view>
+
+<!-- 正常内容 -->
+<block wx:else>
   <!-- 顶部语音控制按钮 -->
   <view class="voice-toggle" bindtap="toggleSound">
     <image src="{{isSoundOn ? '/images/sound.png' : '/images/mute.png'}}" mode="aspectFit" class="voice-icon"></image>
   </view>
 
-  <!-- 角色图像（固定位置） -->
+  <!-- 角色图像 -->
   <view class="character-container {{characterMoved ? 'moved' : ''}}">
-    <image class="character-img" src="{{characterSrc}}" mode="aspectFit"></image>
+    <image class="character-img" src="{{characterSrc}}" mode="widthFix"></image>
   </view>
 
   <!-- 消息列表 -->
   <scroll-view class="chat-list" scroll-y scroll-into-view="{{scrollToView}}" enhanced>
-    <block wx:if="{{messages.length === 0}}">
-      <view class="usage-tip">
-        <text class="tip-title">💡 使用提示</text>
-        <text class="tip-item">发布任务：任务名</text>
-        <text class="tip-item">查询任务：任务名</text>
-        <text class="tip-item">评价任务：任务名为x星</text>
-        <text class="tip-item">取消任务：任务名</text>
-        <text class="tip-desc">您也可以直接和我聊天哦～</text>
-      </view>
-    </block>
+    <!-- 关键：用 .msg-list 包裹所有消息，实现从底部排列 -->
+    <view class="msg-list">
+      <view wx:for="{{messages}}" wx:key="_id" id="msg-{{index}}" class="msg-item {{item.sender === 'user' ? 'user-msg' : 'ai-msg'}}">
+        <text>{{item.text}}</text>
+        <!-- 手动播放按钮 -->
+        <view wx:if="{{item.sender === 'ai' && item.voiceFileID && !isSoundOn}}" class="play-btn" bindtap="playVoice" data-fileid="{{item.voiceFileID}}">🔊</view>
+        <!-- 任务卡片 -->
+        <view wx:if="{{item.sender === 'ai' && item.actionResult && item.actionResult.action === 'publish' && item.actionResult.code === 0}}" 
+          class="task-card" bindtap="goTaskDetail" data-taskid="{{item.actionResult.taskId}}">
+          <text class="card-title">📋 任务已发布</text>
+          <text class="card-name">{{item.actionResult.taskName || '未命名任务'}}</text>
+          <text class="card-tip">点击查看详情 →</text>
+        </view>
 
-    <view wx:for="{{messages}}" wx:key="_id" id="msg-{{index}}" class="msg-item {{item.sender === 'user' ? 'user-msg' : 'ai-msg'}}">
-      <text>{{item.text}}</text>
-      <!-- 手动播放按钮（仅AI回复有语音且声音关闭时显示） -->
-      <view wx:if="{{item.sender === 'ai' && item.voiceFileID && !isSoundOn}}" class="play-btn" bindtap="playVoice" data-fileid="{{item.voiceFileID}}">🔊</view>
-      
-      <!-- 任务卡片（仅当发布任务成功时显示） -->
-      <view wx:if="{{item.sender === 'ai' && item.actionResult && item.actionResult.action === 'publish' && item.actionResult.code === 0}}" 
-            class="task-card" bindtap="goTaskDetail" data-taskid="{{item.actionResult.taskId}}">
-        <text class="card-title">📋 任务已发布</text>
-        <text class="card-name">{{item.actionResult.taskName || '未命名任务'}}</text>
-        <text class="card-tip">点击查看详情 →</text>
+          <!-- 任务卡片：查询成功 -->
+        <view wx:elif="{{item.sender === 'ai' && item.actionResult && item.actionResult.action === 'getStatus' && item.actionResult.code === 0}}" 
+          class="task-card" bindtap="goTaskDetail" data-taskid="{{item.actionResult.taskId}}">
+          <text class="card-title">📋 任务状态</text>
+          <text class="card-name">{{item.actionResult.taskName}}</text>
+          <text class="card-tip">{{item.actionResult.reply}}</text>
+        </view>
       </view>
     </view>
   </scroll-view>
 
-  <!-- 底部输入区域 -->
-  <view class="input-area">
-    <input class="text-input" 
-           placeholder="输入您的问题或指令" 
-           value="{{inputText}}" 
-           bindinput="onInput" 
-           confirm-type="send" 
-           bindconfirm="sendMessage"/>
-    <button class="send-btn {{inputText.trim() ? 'active' : ''}}" bindtap="sendMessage">发送</button>
+  <!-- 使用提示 -->
+  <view wx:if="{{messages.length === 0}}" class="usage-tip-wrapper">
+    <view class="usage-tip">
+      <text class="tip-title">💡 使用提示</text>
+      <text class="tip-item">发布任务：任务名</text>
+      <text class="tip-item">查询任务：任务名</text>
+      <text class="tip-item">评价任务：任务名为x星</text>
+      <text class="tip-item">取消任务：任务名</text>
+      <text class="tip-desc">您也可以直接和我聊天哦～</text>
+    </view>
   </view>
+
+  <!-- 底部输入区域 -->
+    <view class="input-area">
+      <input class="text-input" 
+            placeholder="输入您的问题或指令" 
+            value="{{inputText}}" 
+            bindinput="onInput" 
+            confirm-type="send" 
+            bindconfirm="sendMessage"/>
+      <button class="send-btn {{inputText.trim() ? 'active' : ''}}" bindtap="sendMessage">发送</button>
+    </view>
+  </block>
 </view>
