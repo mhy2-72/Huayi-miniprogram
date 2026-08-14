@@ -30,12 +30,13 @@
 
 /* 弹窗 */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-.modal-content { width: 90%; max-height: 85vh; background: #fff; border-radius: 24rpx; display: flex; flex-direction: column; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 30rpx; border-bottom: 1rpx solid #f0f0f0; }
+.modal-content { width: 90%; max-height: 85vh; background: #fff; border-radius: 24rpx; display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 30rpx; border-bottom: 1rpx solid #f0f0f0; flex-shrink: 0; }
 .modal-title { font-size: 34rpx; font-weight: bold; }
 .modal-close { font-size: 36rpx; color: #999; }
-.modal-body { flex: 1; padding: 30rpx; max-height: 60vh; }
-.modal-footer { display: flex; gap: 20rpx; padding: 24rpx; border-top: 1rpx solid #f0f0f0; }
+.modal-body { flex: 1; padding: 30rpx; overflow: hidden; box-sizing: border-box; }
+.modal-body scroll-view { height: 100%; }
+.modal-footer { display: flex; gap: 20rpx; padding: 24rpx; border-top: 1rpx solid #f0f0f0; flex-shrink: 0; }
 .modal-footer button { flex: 1; border-radius: 40rpx; font-size: 30rpx; }
 
 .info-section { margin-bottom: 24rpx; }

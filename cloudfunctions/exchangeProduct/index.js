@@ -37,19 +37,35 @@ exports.main = async (event, context) => {
       exchangeCode = Math.random().toString(36).slice(2, 10).toUpperCase();
       productName = product.data.name;
 
-      // 创建订单
+      const now = new Date();
+
+      // 创建订单（待兑换状态）
       await transaction.collection('orders').add({
         data: {
           userId,
           productId,
           pointsCost: costPoints,
           status: 'pending',
-          createTime: new Date(),
+          createTime: now,
           code: exchangeCode
         }
       });
 
-      return { pointsAfter: user.data.points - costPoints };
+      // 同步写入兑换码记录，便于管理员查询和申诉关联
+      await transaction.collection('exchangeCodes').add({
+        data: {
+          code: exchangeCode,
+          userId,
+          productId,
+          productName,
+          pointsCost: costPoints,
+          status: 'pending',
+          createTime: now,
+          source: 'user_exchange'
+        }
+      });
+
+      return { pointsAfter: user.data.points - costPoints, exchangeCode, productName, costPoints };
     });
 
     // 写入积分消费日志

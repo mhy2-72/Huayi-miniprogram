@@ -89,16 +89,15 @@ exports.main = async (event) => {
           try { return (await db.collection(col).where(where).count()).total; }
           catch (e) { return 0; }
         };
-        const [pendingComplaints, pendingExchanges, totalTasks, totalUsers, pendingCertifications] = await Promise.all([
+        const [allPending, totalTasks, totalUsers, pendingCertifications] = await Promise.all([
           countSafe('complain', { status: 'pending' }),
-          countSafe('exchangeCodes', { status: 'pending' }),
           countSafe('tasks'),
           countSafe('users', { admin: _.neq(true) }),
           countSafe('complain', { type: 'certification', status: 'pending' })
         ]);
+        const pendingComplaints = allPending - pendingCertifications;
         return { code: 0, data: {
-          pendingComplaints,
-          pendingExchanges,
+          pendingComplaints: Math.max(0, pendingComplaints),
           totalTasks,
           totalUsers,
           pendingCertifications
@@ -111,6 +110,9 @@ exports.main = async (event) => {
         if (filter === 'pending') query = { status: 'pending' };
         else if (filter === 'resolved') query = { status: db.command.in(['resolved', 'rejected']) };
         // 'all' or default: no status filter
+
+        // 排除资质认证类型，资质认证由独立页面管理
+        query.type = db.command.neq('certification');
 
         const MAX_RESULTS = 100;
         let complaintRes;
@@ -737,6 +739,94 @@ exports.main = async (event) => {
 
         await logAdminAction(admin._id, admin.nickName, `移除用户资质(${certType})`, userId, '');
         return { code: 0, msg: '已移除' };
+      }
+
+      case 'redeemExchangeCode': {
+        const { code } = event;
+        if (!code || !code.trim()) return { code: -1, msg: '请输入兑换码' };
+
+        const trimmedCode = code.trim().toUpperCase();
+
+        try {
+          const orderRes = await db.collection('orders').where({ code: trimmedCode }).limit(1).get();
+
+          if (!orderRes.data || orderRes.data.length === 0) {
+            return { code: -1, msg: '兑换码无效' };
+          }
+
+          const order = orderRes.data[0];
+
+          if (order.status === 'redeemed' || order.status === 'completed') {
+            return { code: -1, msg: '该兑换码已被兑换' };
+          }
+
+          if (order.status !== 'pending') {
+            return { code: -1, msg: `该兑换码状态异常（${order.status}）` };
+          }
+
+          const now = db.serverDate();
+
+          // 更新订单为已兑换
+          await db.collection('orders').doc(order._id).update({
+            data: { status: 'redeemed', redeemTime: now, redeemedBy: admin.nickName }
+          });
+
+          // 同步更新 exchangeCodes 集合
+          try {
+            await db.collection('exchangeCodes').where({ code: trimmedCode }).limit(1).update({
+              data: { status: 'redeemed', redeemTime: now, redeemedBy: admin.nickName }
+            });
+          } catch (e) {}
+
+          // 发送通知给用户
+          try {
+            await db.collection('notifications').add({
+              data: {
+                userId: order.userId,
+                title: '兑换码已核销',
+                message: `您的兑换码 ${trimmedCode} 已由管理员核销。`,
+                type: 'exchange',
+                read: false,
+                createTime: now
+              }
+            });
+          } catch (e) {}
+
+          // Try to get product info
+          let productName = '未知商品';
+          try {
+            if (order.productId) {
+              const productRes = await db.collection('products').doc(order.productId).get();
+              if (productRes.data) productName = productRes.data.name;
+            }
+          } catch (e) {}
+
+          // Try to get user info
+          let userName = '未知用户';
+          try {
+            if (order.userId) {
+              const userRes = await db.collection('users').doc(order.userId).get();
+              if (userRes.data) userName = userRes.data.nickName || '未知用户';
+            }
+          } catch (e) {}
+
+          await logAdminAction(admin._id, admin.nickName, `兑换码核销`, trimmedCode, `商品：${productName}，用户：${userName}`);
+
+          return {
+            code: 0,
+            msg: '兑换码有效',
+            data: {
+              code: trimmedCode,
+              productName,
+              userName,
+              pointsCost: order.pointsCost || 0,
+              orderId: order._id
+            }
+          };
+        } catch (e) {
+          console.error('兑换码核销失败', e);
+          return { code: -1, msg: '核销失败，请重试' };
+        }
       }
 
       default:
