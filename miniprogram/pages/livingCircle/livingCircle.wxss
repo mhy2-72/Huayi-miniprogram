@@ -13,6 +13,30 @@
   line-height: 1.4;
 }
 
+.location-banner {
+  display: flex;
+  align-items: center;
+  background: #fffbe6;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid #ffe58f;
+}
+.loc-icon {
+  font-size: 28rpx;
+  margin-right: 10rpx;
+}
+.loc-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #d48806;
+}
+.loc-action {
+  font-size: 26rpx;
+  color: #1890ff;
+  padding: 4rpx 16rpx;
+  border: 1rpx solid #1890ff;
+  border-radius: 24rpx;
+}
+
 /* 范围提示横幅 */
 .range-banner {
   display: flex;

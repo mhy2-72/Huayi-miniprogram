@@ -579,14 +579,18 @@ exports.main = async (event) => {
         if (categoryName) data.categoryName = categoryName;
         if (latitude !== undefined) data.latitude = latitude;
         if (longitude !== undefined) data.longitude = longitude;
-        await db.collection('livingCirclePOIs').doc(poiId).update({ data });
+        const matchRes = await db.collection('livingCirclePOIs').where({ id: poiId }).limit(1).get();
+        if (!matchRes.data.length) return { code: -1, msg: '地点不存在' };
+        await db.collection('livingCirclePOIs').doc(matchRes.data[0]._id).update({ data });
         await logAdminAction(admin._id, admin.nickName, '更新生活圈地点', name || poiId, '');
         return { code: 0 };
       }
 
       case 'deleteLivingCirclePOI': {
         const { poiId } = event;
-        await db.collection('livingCirclePOIs').doc(poiId).remove();
+        const matchRes = await db.collection('livingCirclePOIs').where({ id: poiId }).limit(1).get();
+        if (!matchRes.data.length) return { code: -1, msg: '地点不存在' };
+        await db.collection('livingCirclePOIs').doc(matchRes.data[0]._id).remove();
         await logAdminAction(admin._id, admin.nickName, '删除生活圈地点', poiId, '');
         return { code: 0 };
       }

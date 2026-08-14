@@ -5,6 +5,13 @@
     <text>部分数据来源于用户上传，本平台不对该类数据的真实性负责</text>
   </view>
 
+  <!-- 未获取位置提示 -->
+  <view wx:if="{{!hasLocation}}" class="location-banner" bindtap="requestLocation">
+    <text class="loc-icon">📍</text>
+    <text class="loc-text">未获取位置，距离基于虹口区中心计算</text>
+    <text class="loc-action">授权定位</text>
+  </view>
+
   <!-- 范围提示横幅 -->
   <view wx:if="{{showRangeNotice}}" class="range-banner" bindtap="dismissNotice">
     <text class="range-icon">📍</text>

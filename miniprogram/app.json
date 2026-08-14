@@ -29,6 +29,15 @@
     "navigationBarTitleText": "申出圆手",
     "navigationBarTextStyle": "black"
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于计算您与生活圈服务地点的距离，提供更好的推荐服务"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
   "useExtendedLib": {
     "weui": true
   },

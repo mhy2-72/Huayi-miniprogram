@@ -16,11 +16,35 @@ Page({
     rangeNotice: '',
     showRangeNotice: true,
     _allPOIs: [],
-    _dataSource: 'local'
+    _dataSource: 'local',
+    userLatitude: 0,
+    userLongitude: 0,
+    hasLocation: false
   },
 
   onLoad() {
     this.loadData();
+    this.getUserLocation();
+  },
+
+  onShow() {
+    this.getUserLocation();
+  },
+
+  async getUserLocation() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        this.setData({
+          userLatitude: res.latitude,
+          userLongitude: res.longitude,
+          hasLocation: true
+        }, () => this.refresh());
+      },
+      fail: () => {
+        this.setData({ hasLocation: false }, () => this.refresh());
+      }
+    });
   },
 
   async loadData() {
@@ -38,13 +62,10 @@ Page({
       }
     } catch (e) {
       console.warn('云端加载失败，使用本地数据', e);
-      // 本地数据已经在上面设置好了，不需要额外处理
     }
   },
 
   applyData(categories, pois, source) {
-    // 更新 recommend 函数使用的 POIS 数据源
-    // 由于 utils/livingCircle.js 是模块级缓存，我们直接在页面内进行计算
     this._categories = categories;
     this._pois = pois;
     this._dataSource = source;
@@ -55,7 +76,6 @@ Page({
     }, () => this.refresh());
   },
 
-  // 本地实现的 recommend，使用当前数据源
   recommendLocal({ text, category, center, onlyInRange }) {
     const c = center || CENTER;
     const target = category || matchCategory(text);
@@ -77,11 +97,16 @@ Page({
   },
 
   refresh() {
-    const { keyword, selectedCategory } = this.data;
+    const { keyword, selectedCategory, hasLocation, userLatitude, userLongitude } = this.data;
+    // 使用用户位置计算距离，无位置时降级使用虹口区中心
+    const center = hasLocation
+      ? { latitude: userLatitude, longitude: userLongitude }
+      : CENTER;
+
     const result = this.recommendLocal({
       text: keyword.trim(),
       category: selectedCategory || undefined,
-      center: CENTER
+      center: center
     });
 
     let rangeNotice = '';
@@ -152,5 +177,30 @@ Page({
 
   dismissNotice() {
     this.setData({ showRangeNotice: false });
+  },
+
+  requestLocation() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        this.setData({
+          userLatitude: res.latitude,
+          userLongitude: res.longitude,
+          hasLocation: true
+        }, () => this.refresh());
+      },
+      fail: () => {
+        wx.showModal({
+          title: '无法获取位置',
+          content: '您未授权定位权限，距离信息将基于虹口区中心计算。请在设置中开启定位权限以获得更准确的距离信息。',
+          confirmText: '去设置',
+          success: (r) => {
+            if (r.confirm) {
+              wx.openSetting();
+            }
+          }
+        });
+      }
+    });
   }
 });
