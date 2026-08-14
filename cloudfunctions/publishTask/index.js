@@ -88,37 +88,39 @@ function classifyTask(description) {
 }
 
 // ========== 检测是否需要资质认证 ==========
-function detectCertificationRequired(description) {
-  const certKeywords = [
-    { keywords: ['法律', '律师', '诉讼', '合同', '法务', '法律咨询', '法律顾问', '起诉', '仲裁', '法律援助'], type: '法律咨询' },
-    { keywords: ['医疗', '医生', '诊断', '治疗', '看病', '就医', '健康咨询', '医疗建议', '用药', '处方', '康复', '理疗'], type: '医疗咨询' },
-    { keywords: ['辅导', '家教', '教学', '教育', '培训', '补习', '授课', '讲题', '学习方法', '考试', '功课', '作业辅导'], type: '教育辅导' },
-    { keywords: ['财务', '投资', '理财', '税务', '审计', '会计', '报税', '财务咨询', '资产管理', '保险', '基金', '股票'], type: '财务咨询' },
-  ];
+// 目前支持的资质类型：护理(nursing)、修理(repair)，保留后期扩展
+const CERT_TYPES = {
+  nursing: { name: '护理', keywords: ['护理', '陪床', '陪护', '照护', '照料', '康复护理', '术后护理', '护士', '打针', '换药', '导尿', '鼻饲', '压疮', '生命体征', '医疗护理'] },
+  repair: { name: '修理', keywords: ['维修', '修理', '修', '换灯泡', '修家具', '通下水道', '家电维修', '修水管', '修电路', '拆装', '水电', '木工', '管道', '电路', '焊接', '机械维修'] }
+};
 
+function detectCertificationRequired(description) {
   const text = description.toLowerCase();
   const matched = [];
 
-  for (const item of certKeywords) {
-    for (const keyword of item.keywords) {
+  for (const [typeKey, config] of Object.entries(CERT_TYPES)) {
+    for (const keyword of config.keywords) {
       if (text.includes(keyword.toLowerCase())) {
-        matched.push(item.type);
+        matched.push(typeKey);
         break;
       }
     }
   }
 
   if (matched.length > 0) {
+    const typeNames = matched.map(t => CERT_TYPES[t].name);
     return {
       required: true,
       types: matched,
-      message: `该任务涉及${matched.join('、')}，需要上传相关资质证明`
+      typeNames: typeNames,
+      message: `该任务涉及${typeNames.join('、')}，接取者须已通过对应资质认证`
     };
   }
 
   return {
     required: false,
     types: [],
+    typeNames: [],
     message: ''
   };
 }
@@ -189,10 +191,11 @@ exports.main = async (event, context) => {
   // ✅ 如果需要资质认证，但用户没有上传资质图片
   if (certCheck.required && (!certificationImages || certificationImages.length === 0)) {
     return {
-      code: -2,  // 特殊状态码：需要资质认证
+      code: -2,
       msg: certCheck.message,
       certRequired: true,
-      certTypes: certCheck.types
+      certTypes: certCheck.types,
+      certTypeNames: certCheck.typeNames
     };
   }
 
@@ -270,6 +273,7 @@ exports.main = async (event, context) => {
         // ✅ 资质认证相关字段
         certRequired: certCheck.required,
         certTypes: certCheck.types,
+        certTypeNames: certCheck.typeNames || [],
         certificationImages: certificationImages || [],
         isCertified: certCheck.required ? false : true
       }
@@ -287,6 +291,7 @@ exports.main = async (event, context) => {
     category: category,
     ageGroup: ageGroup,
     certRequired: certCheck.required,
+    certTypeNames: certCheck.typeNames || [],
     msg: '发布成功'
   };
 };

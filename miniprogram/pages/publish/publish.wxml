@@ -36,7 +36,7 @@
       <view class="cert-types">
         <text class="types-label">需要的资质类型：</text>
         <view class="types-tags">
-          <text class="tag" wx:for="{{certTypes}}" wx:key="index">{{item}}</text>
+          <text class="tag" wx:for="{{certTypeNames}}" wx:key="index">{{item}}</text>
         </view>
       </view>
       

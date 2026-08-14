@@ -1,15 +1,12 @@
-// miniprogram/utils/livingCircle.js —— 纯函数，无 wx.* 依赖，可被 node 测试
-const { CENTER, POIS } = require('../data/livingCircle.js');
+// miniprogram/utils/livingCircle.js —— 纯函数，无 wx.* 依赖
+const { CENTER, RANGE_RADIUS, POIS } = require('../data/livingCircle.js');
 
 const CATEGORY_KEYWORDS = {
-  pharmacy:    ['药', '降压', '感冒', '医保', '处方', '买药'],
-  market:      ['买菜', '蔬菜', '菜', '肉', '海鲜', '水果'],
-  bank:        ['银行', '取钱', '取款', '存款', '柜台', '存钱'],
-  barber:      ['理发', '剪发', '烫发', '染发'],
-  repair:      ['修', '维修', '家电', '电灯', '水管', '换锁', '配钥匙'],
-  canteen:     ['食堂', '吃饭', '就餐', '早饭', '午饭', '晚饭'],
-  supermarket: ['超市', '生活用品', '日用品', '油盐', '购物'],
-  hospital:    ['医院', '看病', '挂号', '门诊', '急诊', '体检']
+  canteen:      ['食堂', '吃饭', '就餐', '早饭', '午饭', '晚饭', '社区食堂', '长者食堂', '饭堂', '大食堂', '市集', '邻里饭堂'],
+  barber:       ['理发', '剪发', '烫发', '染发', '美发', '造型', '发型'],
+  course:       ['课程', '老年大学', '活动中心', '培训班', '学习班', '兴趣班'],
+  entertainment: ['娱乐', '棋牌室', '麻将', '电影院', '公园', '散步', '广场舞', '看电影'],
+  counseling:   ['心理咨询', '心理', '咨询', '咨询师', '倾诉']
 };
 
 function matchCategory(text) {
@@ -28,7 +25,7 @@ function matchCategory(text) {
 }
 
 function calcDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371000; // 地球半径，米
+  const R = 6371000;
   const toRad = d => (d * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLng = toRad(lng2 - lng1);
@@ -37,15 +34,53 @@ function calcDistance(lat1, lng1, lat2, lng2) {
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-function recommend({ text, category, center }) {
+// 计算某点是否在虹口区限定范围内
+function isInRange(lat, lng) {
+  const distance = calcDistance(CENTER.latitude, CENTER.longitude, lat, lng);
+  return distance <= RANGE_RADIUS;
+}
+
+function recommend({ text, category, center, onlyInRange }) {
   const c = center || CENTER;
   const target = category || matchCategory(text);
   const matched = Boolean(target);
-  const pool = target ? POIS.filter(p => p.category === target) : POIS;
+  let pool = target ? POIS.filter(p => p.category === target) : POIS;
+
+  if (onlyInRange) {
+    pool = pool.filter(p => p.inRange);
+  }
+
   const list = pool
-    .map(p => ({ ...p, distanceMeters: calcDistance(c.latitude, c.longitude, p.latitude, p.longitude) }))
+    .map(p => ({
+      ...p,
+      distanceMeters: calcDistance(c.latitude, c.longitude, p.latitude, p.longitude)
+    }))
     .sort((a, b) => a.distanceMeters - b.distanceMeters);
+
   return { list, matched, category: target };
 }
 
-module.exports = { CATEGORY_KEYWORDS, matchCategory, calcDistance, recommend };
+// 搜索POIs，返回范围内和范围外的结果
+function smartSearch({ text, category }) {
+  const target = category || matchCategory(text);
+  let pool = target ? POIS.filter(p => p.category === target) : POIS;
+
+  const inRange = pool.filter(p => p.inRange);
+  const outOfRange = pool.filter(p => !p.inRange);
+
+  const enrich = (list) => list
+    .map(p => ({
+      ...p,
+      distanceMeters: calcDistance(CENTER.latitude, CENTER.longitude, p.latitude, p.longitude)
+    }))
+    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+  return {
+    matched: Boolean(target),
+    category: target,
+    inRangeList: enrich(inRange),
+    outOfRangeList: enrich(outOfRange)
+  };
+}
+
+module.exports = { CATEGORY_KEYWORDS, matchCategory, calcDistance, isInRange, recommend, smartSearch };

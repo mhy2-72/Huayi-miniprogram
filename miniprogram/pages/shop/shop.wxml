@@ -1,5 +1,8 @@
 <view class="container">
   <view class="my-points">我的积分：{{myPoints}}</view>
+
+  <!-- 商品列表 -->
+  <view class="section-title">积分兑换</view>
   <view class="product-list">
     <view class="product-card" wx:for="{{products}}" wx:key="_id">
       <image src="{{item.image}}" mode="aspectFill" class="product-img"></image>
@@ -14,5 +17,32 @@
       </view>
     </view>
     <view wx:if="{{!products.length}}" class="empty">暂无商品</view>
+  </view>
+
+  <!-- 我的兑换记录 -->
+  <view class="orders-section">
+    <view class="orders-header" bindtap="toggleOrders">
+      <text class="section-title">我的兑换记录</text>
+      <text class="orders-toggle">{{showOrders ? '收起' : '展开'}} ({{myOrders.length}})</text>
+    </view>
+
+    <view wx:if="{{showOrders}}" class="orders-list">
+      <view wx:if="{{!myOrders.length}}" class="empty">暂无兑换记录</view>
+      <view wx:for="{{myOrders}}" wx:key="_id" class="order-card">
+        <view class="order-head">
+          <text class="order-code-label">兑换码</text>
+          <text class="order-code">{{item.code}}</text>
+          <text class="order-copy" catchtap="copyCode" data-code="{{item.code}}">复制</text>
+        </view>
+        <view class="order-body">
+          <text class="order-productId">商品ID：{{item.productId}}</text>
+          <text class="order-points">消耗：{{item.pointsCost}}积分</text>
+          <text class="order-status status-{{item.status}}">{{item.statusText}}</text>
+        </view>
+        <view class="order-footer">
+          <text class="order-time">{{item.createTime_str}}</text>
+        </view>
+      </view>
+    </view>
   </view>
 </view>

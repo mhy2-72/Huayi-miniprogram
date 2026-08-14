@@ -33,7 +33,7 @@ exports.main = async (event, context) => {
   else if (age >= 18 && age <= 35) role = 'young';
   else if (age >= 36 && age <= 59) role = 'middle';
   else if (age >= 60) role = 'elder';
-  else role = 'young';  // 可选：处理未覆盖年龄段（如12岁以下），避免 role 为空
+  else role = 'teen';  // 可选：处理未覆盖年龄段（如12岁以下），避免 role 为空
 
   await db.collection('users').add({
     data: {
@@ -47,6 +47,7 @@ exports.main = async (event, context) => {
       gender,
       occupation,    // 新增职业字段
       points: 0,
+      admin: false,
       createTime: new Date()
     }
   });

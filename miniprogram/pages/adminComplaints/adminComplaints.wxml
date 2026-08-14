@@ -1,0 +1,141 @@
+<view class="container">
+  <!-- 筛选 -->
+  <view class="filter-bar">
+    <view class="filter-item {{filter === item.key ? 'active' : ''}}"
+          wx:for="{{filters}}" wx:key="key"
+          bindtap="switchFilter" data-key="{{item.key}}">
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 申诉列表 -->
+  <view class="complaint-list">
+    <view wx:for="{{complaints}}" wx:key="_id" class="complaint-card"
+          bindtap="viewComplaint" data-id="{{item._id}}">
+      <view class="complaint-head">
+        <text class="complaint-type">{{item.typeText}}</text>
+        <text class="complaint-status {{item.status}}">{{item.status === 'pending' ? '待处理' : '已处理'}}</text>
+      </view>
+      <view class="complaint-body">{{item.description}}</view>
+      <view class="complaint-meta">
+        <text>{{item.createTime_str}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{!complaints.length && !loading}}" class="empty">暂无申诉</view>
+  </view>
+
+  <!-- 详情弹窗 -->
+  <view wx:if="{{showDetail && currentComplaint}}" class="detail-modal" bindtap="closeDetail">
+    <view class="detail-content" catchtap="preventBubble">
+      <view class="detail-header">
+        <text class="detail-title">申诉详情</text>
+        <text class="detail-close" catchtap="closeDetail">×</text>
+      </view>
+      <scroll-view scroll-y class="detail-body">
+        <view class="detail-row"><text class="label">申诉类型：</text><text>{{currentComplaint.typeText}}</text></view>
+        <view class="detail-row"><text class="label">申诉人：</text><text>{{currentComplaint.userName || '未知'}}</text></view>
+        <view class="detail-row"><text class="label">提交时间：</text><text>{{currentComplaint.createTime_str}}</text></view>
+        
+        <!-- 用户信息变更申诉 -->
+        <block wx:if="{{currentComplaint.type === 'userInfo'}}">
+          <view class="detail-section">
+            <text class="section-title">用户信息</text>
+            <view wx:if="{{currentComplaint.userChanges}}" class="change-list">
+              <view wx:for="{{currentComplaint.userChanges}}" wx:for-item="change" wx:key="key" class="change-item">
+                <text class="change-key">{{change.key}}:</text>
+                <text class="change-old">{{change.old}}</text>
+                <text class="change-new">{{change.new}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 任务相关申诉 -->
+        <block wx:if="{{currentComplaint.type === 'task'}}">
+          <view class="detail-section">
+            <text class="section-title">关联任务</text>
+            <view wx:if="{{currentComplaint.taskId}}" class="task-link" bindtap="goToTask" data-taskid="{{currentComplaint.taskId}}">
+              查看任务详情 ›
+            </view>
+          </view>
+        </block>
+
+        <!-- 兑换相关申诉 -->
+        <block wx:if="{{currentComplaint.type === 'exchange'}}">
+          <view class="detail-section">
+            <text class="section-title">用户近期兑换记录（3天内）</text>
+            <view wx:if="{{currentComplaint.exchangeRecords && currentComplaint.exchangeRecords.length}}" class="exchange-list">
+              <view wx:for="{{currentComplaint.exchangeRecords}}" wx:for-item="rec" wx:key="code" class="exchange-item">
+                <text class="exchange-product">{{rec.productName}}</text>
+                <text class="exchange-code">兑换码：{{rec.code}}</text>
+                <text class="exchange-time">{{rec.time}}</text>
+                <text class="exchange-status {{rec.status}}">{{rec.status === 'pending' ? '待使用' : '已使用'}}</text>
+              </view>
+            </view>
+            <view wx:else class="empty-hint">该用户近期暂无兑换记录</view>
+          </view>
+        </block>
+
+        <!-- 生活圈信息错误/补充 -->
+        <block wx:if="{{currentComplaint.type === 'livingCircle'}}">
+          <view class="detail-section">
+            <text class="section-title">申诉子类型</text>
+            <view class="lc-subtype">
+              <text wx:if="{{currentComplaint.subType === 'error'}}">信息有误</text>
+              <text wx:elif="{{currentComplaint.subType === 'addition'}}">补充新地点</text>
+              <text wx:else>{{currentComplaint.subType}}</text>
+            </view>
+          </view>
+          <view wx:if="{{currentComplaint.subType === 'error' && currentComplaint.targetPOIId}}" class="detail-section">
+            <text class="section-title">被举报地点ID</text>
+            <view class="lc-target">{{currentComplaint.targetPOIId}}</view>
+          </view>
+          <view wx:if="{{currentComplaint.subType === 'addition' && currentComplaint.newPOI}}" class="detail-section">
+            <text class="section-title">用户提交的新地点信息</text>
+            <view class="lc-newpoi">
+              <view class="lc-field"><text class="lc-label">名称：</text><text>{{currentComplaint.newPOI.name}}</text></view>
+              <view class="lc-field"><text class="lc-label">分类：</text><text>{{currentComplaint.newPOI.categoryName || currentComplaint.newPOI.category}}</text></view>
+              <view class="lc-field"><text class="lc-label">地址：</text><text>{{currentComplaint.newPOI.address}}</text></view>
+              <view wx:if="{{currentComplaint.newPOI.latitude}}" class="lc-field">
+                <text class="lc-label">坐标：</text>
+                <text>{{currentComplaint.newPOI.latitude}}, {{currentComplaint.newPOI.longitude}}</text>
+              </view>
+              <view wx:if="{{currentComplaint.newPOI.desc}}" class="lc-field">
+                <text class="lc-label">描述：</text>
+                <text>{{currentComplaint.newPOI.desc}}</text>
+              </view>
+              <view class="lc-notice">审核通过后将自动添加到生活圈地点</view>
+            </view>
+          </view>
+        </block>
+
+        <view class="detail-section">
+          <text class="section-title">申诉说明</text>
+          <view class="complaint-desc">{{currentComplaint.description}}</view>
+        </view>
+
+        <view wx:if="{{currentComplaint.evidenceImages && currentComplaint.evidenceImages.length}}" class="detail-section">
+          <text class="section-title">证据图片</text>
+          <view class="evidence-grid">
+            <image wx:for="{{currentComplaint.evidenceImages}}" wx:for-item="img" wx:key="*this"
+                   src="{{img}}" mode="aspectFill" class="evidence-img"
+                   bindtap="previewEvidence" data-url="{{img}}" data-urls="{{currentComplaint.evidenceImages}}"/>
+          </view>
+        </view>
+
+        <view wx:if="{{currentComplaint.adminNote}}" class="detail-section">
+          <text class="section-title">处理说明</text>
+          <view class="admin-note">{{currentComplaint.adminNote}}</view>
+        </view>
+      </scroll-view>
+
+      <view wx:if="{{currentComplaint.status === 'pending'}}" class="detail-actions">
+        <button class="btn-reject" bindtap="handleComplaint" 
+                data-id="{{currentComplaint._id}}" data-result="rejected">驳回</button>
+        <button class="btn-approve" bindtap="handleComplaint"
+                data-id="{{currentComplaint._id}}" data-result="resolved">通过</button>
+      </view>
+    </view>
+  </view>
+</view>

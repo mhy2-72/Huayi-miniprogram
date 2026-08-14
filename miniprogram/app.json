@@ -12,7 +12,16 @@
     "pages/pointHistory/pointHistory",
     "pages/agreement/agreement",
     "pages/livingCircle/livingCircle",
-    "pages/aichat/aichat"
+    "pages/aichat/aichat",
+    "pages/complain/complain",
+    "pages/admin/admin",
+    "pages/adminComplaints/adminComplaints",
+    "pages/adminProducts/adminProducts",
+    "pages/adminTasks/adminTasks",
+    "pages/adminUsers/adminUsers",
+    "pages/adminLivingCircle/adminLivingCircle",
+    "pages/adminLogs/adminLogs",
+    "pages/adminQualifications/adminQualifications"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -1,0 +1,93 @@
+<view class="container">
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索用户名/职业" value="{{searchKey}}" bindinput="onSearchInput" confirm-type="search" bindconfirm="doSearch"/>
+    <button class="search-btn" bindtap="doSearch">搜索</button>
+  </view>
+
+  <view class="user-list">
+    <view wx:for="{{users}}" wx:key="_id" class="user-card">
+      <image src="{{item.avatarUrl || '/images/default-avatar.png'}}" class="user-avatar"/>
+      <view class="user-info">
+        <text class="user-name">{{item.nickName}}</text>
+        <text class="user-detail">{{item.occupation}} · {{item.role}}</text>
+        <text class="user-points">积分：{{item.points || 0}}</text>
+        <view wx:if="{{item.certifications && item.certifications.length}}" class="user-certs">
+          <text wx:for="{{item.certifications}}" wx:for-item="cert" wx:key="type" wx:if="{{cert.status === 'approved'}}" class="cert-badge">{{cert.name}}</text>
+        </view>
+      </view>
+      <view class="user-actions">
+        <view class="action-link cert" bindtap="openCertModal" data-id="{{item._id}}">资质</view>
+        <view class="action-link" bindtap="editUser" data-id="{{item._id}}">编辑</view>
+        <view class="action-link danger" bindtap="deleteUser" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+    <view wx:if="{{!users.length && !loading}}" class="empty">暂无用户</view>
+  </view>
+
+  <!-- 编辑用户弹窗 -->
+  <view wx:if="{{showEditModal && editingUser}}" class="modal-overlay" bindtap="closeModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">编辑用户</view>
+      
+      <view class="avatar-section">
+        <image src="{{editData.avatarUrl || '/images/default-avatar.png'}}" class="edit-avatar"/>
+        <button class="change-avatar-btn" bindtap="onChangeAvatar">更换头像</button>
+      </view>
+      
+      <view class="form-item"><text class="form-label">昵称</text>
+        <input class="form-input" value="{{editData.nickName}}" bindinput="onEditInput" data-field="nickName"/>
+      </view>
+      <view class="form-item"><text class="form-label">性别</text>
+        <input class="form-input" value="{{editData.gender}}" bindinput="onEditInput" data-field="gender"/>
+      </view>
+      <view class="form-item"><text class="form-label">职业</text>
+        <input class="form-input" value="{{editData.occupation}}" bindinput="onEditInput" data-field="occupation"/>
+      </view>
+      <view class="form-item"><text class="form-label">出生日期</text>
+        <picker mode="date" value="{{editData.birthday}}" bindchange="onBirthdayChange">
+          <view class="form-input picker-input">{{editData.birthday || '请选择出生日期'}}</view>
+        </picker>
+      </view>
+      
+      <view class="role-notice" wx:if="{{editData.birthday}}">
+        <text>修改生日后将自动重新分配身份组</text>
+      </view>
+
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeModal">取消</button>
+        <button class="btn-save" bindtap="saveEdit">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 资质管理弹窗 -->
+  <view wx:if="{{showCertModal && certUser}}" class="modal-overlay" bindtap="closeCertModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">资质管理 - {{certUser.nickName}}</view>
+      
+      <view class="current-certs" wx:if="{{certUser.certifications && certUser.certifications.length}}">
+        <text class="section-label">当前已通过的资质：</text>
+        <view class="cert-list">
+          <view wx:for="{{certUser.certifications}}" wx:for-item="cert" wx:key="type" wx:if="{{cert.status === 'approved'}}" class="cert-row">
+            <text class="cert-name">{{cert.name}}</text>
+            <text class="cert-remove" bindtap="revokeCert" data-type="{{cert.type}}">移除</text>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="no-cert-hint">该用户暂无资质认证</view>
+
+      <view class="add-cert-section">
+        <text class="section-label">添加资质认证：</text>
+        <view class="cert-types">
+          <view wx:for="{{certTypes}}" wx:key="key" class="cert-type-btn" bindtap="grantCert" data-type="{{item.key}}">
+            + {{item.name}}
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeCertModal">关闭</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -49,6 +49,37 @@
           <text class="card-name">{{item.actionResult.taskName}}</text>
           <text class="card-tip">点击查看详情</text>
         </view>
+
+        <!-- 生活圈卡片：POI推荐 -->
+        <block wx:elif="{{item.sender === 'ai' && item.actionResult && item.actionResult.action === 'livingCircle' && item.actionResult.code === 0}}">
+          <!-- 范围提示 -->
+          <view wx:if="{{item.actionResult.notice}}" class="lc-notice">{{item.actionResult.notice}}</view>
+          <!-- POI列表 -->
+          <block wx:if="{{item.actionResult.pois.length > 0}}">
+            <view wx:for="{{item.actionResult.pois}}" wx:for-item="poi" wx:key="id"
+                  class="poi-card {{poi.inRange ? '' : 'out-range'}}"
+                  bindtap="openPOILocation"
+                  data-lat="{{poi.latitude}}" data-lng="{{poi.longitude}}"
+                  data-name="{{poi.name}}" data-address="{{poi.address}}">
+              <view class="poi-head">
+                <text class="poi-name">{{poi.name}}</text>
+                <text wx:if="{{poi.inRange}}" class="poi-range-tag">范围内</text>
+                <text wx:else class="poi-range-tag out">范围外</text>
+              </view>
+              <view class="poi-desc">{{poi.desc}}</view>
+              <view class="poi-addr">{{poi.address}}</view>
+              <view class="poi-meta">
+                <text class="poi-cat">{{poi.categoryName}}</text>
+                <text wx:if="{{poi.distanceMeters}}" class="poi-dist">{{poi.distanceMeters}}m</text>
+                <text class="poi-rating">★ {{poi.rating}}</text>
+                <text class="poi-nav">点击导航 ›</text>
+              </view>
+            </view>
+          </block>
+          <!-- 空态提示 -->
+          <view wx:else class="lc-empty">暂未找到匹配的服务</view>
+          <view class="lc-more" bindtap="goLivingCircle">查看更多生活圈服务 ›</view>
+        </block>
       </view>
     </view>
   </scroll-view>
@@ -61,6 +92,7 @@
       <text class="tip-item">查询任务：任务名</text>
       <text class="tip-item">评价任务：任务名为x星</text>
       <text class="tip-item">取消任务：任务名</text>
+      <text class="tip-item">生活圈服务：找食堂、理发、课程等</text>
       <text class="tip-desc">您也可以直接和我聊天哦～</text>
     </view>
   </view>

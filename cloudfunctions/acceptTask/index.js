@@ -1,41 +1,62 @@
-// cloudfunctions/AIpublishTask/index.js
+// cloudfunctions/acceptTask/index.js
 const cloud = require('wx-server-sdk');
 cloud.init();
 const db = cloud.database();
 
+const CERT_TYPE_NAMES = {
+  nursing: '护理',
+  repair: '修理'
+};
+
 exports.main = async (event, context) => {
-  const { openid, taskName } = event;
-  if (!openid || !taskName) return { code: -1, reply: '参数错误' };
+  const wxContext = cloud.getWXContext();
+  const youthId = wxContext.OPENID;
+  const { taskId } = event;
 
-  const user = await db.collection('users').doc(openid).get();
-  // 仅禁止 teen 发布，其他角色均可
-  if (user.data.role === 'teen') return { code: -1, reply: '青少年不可发布任务' };
+  if (!taskId) return { code: -1, msg: '缺少任务ID' };
 
-  const activeCount = await db.collection('tasks').where({
-    elderId: openid,
-    status: db.command.in(['published', 'accepted', 'submitted'])
-  }).count();
-  if (activeCount.total >= 1) return { code: -1, reply: '您已有未完成的任务，请先处理' };
+  try {
+    const taskRes = await db.collection('tasks').doc(taskId).get();
+    const task = taskRes.data;
 
-  const now = new Date();
-  const deadline = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    if (!task) return { code: -1, msg: '任务不存在' };
 
-  await db.collection('tasks').add({
-    data: {
-      elderId: openid,
-      youthId: null,
-      description: taskName,
-      status: 'published',
-      createTime: now,
-      deadline,
-      difficulty: 2,
-      images: [],
-      evidenceImages: [],
-      submitNote: '',
-      rating: 0,
-      elderPoints: 0,
-      youthPoints: 0
+    if (task.status !== 'published') {
+      return { code: -1, msg: '任务已被接取或已取消' };
     }
-  });
-  return { code: 0, reply: `任务“${taskName}”已发布` };
+
+    if (task.elderId === youthId) {
+      return { code: -1, msg: '不能接取自己发布的任务' };
+    }
+
+    // ✅ 资质认证校验
+    if (task.certRequired && task.certTypes && task.certTypes.length > 0) {
+      let userCerts = [];
+      try {
+        const userRes = await db.collection('users').doc(youthId).get();
+        userCerts = (userRes.data && userRes.data.certifications) || [];
+      } catch (e) {
+        return { code: -1, msg: '系统繁忙，请稍后重试' };
+      }
+
+      const certNames = task.certTypes.map(t => CERT_TYPE_NAMES[t] || t).join('、');
+      const hasAll = task.certTypes.every(t => userCerts.some(c => c.type === t && c.status === 'approved'));
+      if (!hasAll) {
+        return { code: -1, msg: `该任务需要${certNames}资质认证，您尚未通过该资质认证，请先申请认证` };
+      }
+    }
+
+    await db.collection('tasks').doc(taskId).update({
+      data: {
+        youthId: youthId,
+        status: 'accepted',
+        acceptTime: new Date()
+      }
+    });
+
+    return { code: 0, msg: '接取成功' };
+  } catch (err) {
+    console.error('接取任务失败:', err);
+    return { code: -1, msg: '接取失败，请重试' };
+  }
 };

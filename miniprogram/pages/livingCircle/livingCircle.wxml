@@ -1,8 +1,20 @@
 <!-- pages/livingCircle/livingCircle.wxml -->
 <view class="container">
+  <!-- 免责声明 -->
+  <view class="disclaimer">
+    <text>部分数据来源于用户上传，本平台不对该类数据的真实性负责</text>
+  </view>
+
+  <!-- 范围提示横幅 -->
+  <view wx:if="{{showRangeNotice}}" class="range-banner" bindtap="dismissNotice">
+    <text class="range-icon">📍</text>
+    <text class="range-text">当前展示虹口区范围内的生活圈服务</text>
+    <text class="range-close">×</text>
+  </view>
+
   <!-- 搜索输入框 -->
   <view class="search-bar">
-    <input class="search-input" placeholder="输入需求，如：哪里有药店"
+    <input class="search-input" placeholder="输入需求，如：哪里有食堂、理发"
            value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search"/>
   </view>
 
@@ -13,25 +25,28 @@
           bindtap="onCategoryTap" data-key="{{item.key}}">{{item.name}}</view>
   </scroll-view>
 
-  <!-- 无匹配提示 -->
-  <view wx:if="{{tip}}" class="tip">{{tip}}</view>
+  <!-- 范围提示 -->
+  <view wx:if="{{rangeNotice}}" class="range-tip">{{rangeNotice}}</view>
 
   <!-- 结果列表 -->
   <view class="result-list">
-    <view wx:for="{{list}}" wx:key="id" class="poi-card {{index === 0 ? 'best' : ''}}"
+    <view wx:for="{{list}}" wx:key="id" class="poi-card {{index === 0 && item.inRange ? 'best' : ''}} {{item.inRangeClass}}"
           bindtap="openLocation" data-poi="{{item}}">
       <view class="poi-head">
         <text class="poi-name">{{item.name}}</text>
-        <text wx:if="{{index === 0}}" class="best-tag">⭐最优推荐</text>
+        <text wx:if="{{index === 0 && item.inRange}}" class="best-tag">⭐最优推荐</text>
+        <text wx:if="{{!item.inRange}}" class="range-tag">范围外</text>
       </view>
+      <view class="poi-desc">{{item.desc}}</view>
       <view class="poi-meta">
         <text class="poi-cat">{{item.categoryName}}</text>
         <text class="poi-dist">{{item.distanceText}}</text>
+        <text class="poi-range">{{item.inRangeText}}</text>
       </view>
       <view class="poi-addr">{{item.address}}</view>
       <view class="poi-foot">
         <text>★ {{item.rating}}</text>
-        <text class="poi-phone">{{item.phone}}</text>
+        <text class="poi-phone">{{item.phone || '暂无电话'}}</text>
         <text class="nav-hint">点击导航 ›</text>
       </view>
     </view>

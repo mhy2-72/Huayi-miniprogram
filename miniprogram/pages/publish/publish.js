@@ -285,7 +285,7 @@ Page({
           showCertModal: true,
           certRequired: true,
           certTypes: checkRes.result.certTypes || [],
-          // 保存已上传的图片ID，用于后续提交
+          certTypeNames: checkRes.result.certTypeNames || [],
           _tempImages: cloudFileIDs,
           _description: description.trim()
         });

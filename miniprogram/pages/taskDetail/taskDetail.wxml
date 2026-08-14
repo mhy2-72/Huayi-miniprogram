@@ -35,6 +35,11 @@
       <text class="value">{{task.description}}</text>
     </view>
 
+    <view wx:if="{{task.certRequired && task.certTypeNames && task.certTypeNames.length}}" class="cert-notice">
+      <text class="cert-icon">🛡️</text>
+      <text class="cert-text">此任务需要资质认证：{{task.certTypeNames}}</text>
+    </view>
+
     <view class="task-info">
       <text class="label">任务状态</text>
       <text class="value">{{statusText[task.status]}}</text>
@@ -94,6 +99,11 @@
     <view wx:if="{{task.submitNote}}" class="task-info">
       <text class="label">凭证说明</text>
       <text class="value">{{task.submitNote}}</text>
+    </view>
+
+    <!-- 接取按钮（任务状态为published，且当前用户不是发布者） -->
+    <view wx:if="{{task.status === 'published' && task.elderId !== myOpenid}}" class="action-area">
+      <button wx:if="{{task.youthId !== myOpenid}}" bindtap="accept" class="btn-accept">接取任务</button>
     </view>
 
     <!-- 发布者操作区（取消任务、评价） -->

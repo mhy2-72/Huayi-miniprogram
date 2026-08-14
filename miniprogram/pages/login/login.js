@@ -7,7 +7,8 @@ Page({
     needRegister: false,
     error: false,
     userInfo: null,
-    greeting: ''
+    greeting: '',
+    isAdmin: false
   },
 
   async onLoad() {
@@ -44,8 +45,7 @@ Page({
         const user = res.data[0];
         wx.setStorageSync('role', user.role);
         const greeting = this.getGreeting(user.role, user.gender);
-        this.setData({ isChecking: false, needRegister: false, userInfo: user, greeting });
-        // 不再自动跳转，等待用户手动点击“进入首页”
+        this.setData({ isChecking: false, needRegister: false, userInfo: user, greeting, isAdmin: user.admin === true });
       } else {
         this.setData({ isChecking: false, needRegister: true });
       }
@@ -65,6 +65,10 @@ Page({
 
   goHome() {
     wx.switchTab({ url: '/pages/index/index' });
+  },
+
+  goAdmin() {
+    wx.navigateTo({ url: '/pages/admin/admin' });
   },
 
   goRegister() {

@@ -52,12 +52,13 @@ Page({
       const data = res.result;
       let task = null;
 
-      if (data.role !== 'teen') {
-        task = data.tasks.find(t => t._id === taskId);
-      } else {
-        task = data.published.find(t => t._id === taskId) ||
-               data.myActive.find(t => t._id === taskId);
-      }
+      // 所有角色都统一搜索三个列表
+      const allTasks = [
+        ...(data.tasks || []),
+        ...(data.published || []),
+        ...(data.myActive || [])
+      ];
+      task = allTasks.find(t => t._id === taskId);
 
       if (!task) {
         const directRes = await wx.cloud.callFunction({
@@ -147,6 +148,16 @@ Page({
     });
 
     newTask.difficultyText = this.getDifficultyText(newTask.difficulty);
+
+    // Map cert type keys to Chinese names
+    const certNameMap = { nursing: '护理', repair: '修理' };
+    if (newTask.certTypes && Array.isArray(newTask.certTypes)) {
+      newTask.certTypeNames = newTask.certTypes.map(t => certNameMap[t] || t);
+    } else if (newTask.certTypeNames && newTask.certTypeNames.length) {
+      // Already has typeNames, keep as is
+    } else {
+      newTask.certTypeNames = [];
+    }
 
     if (newTask.images?.length) {
       try {
@@ -244,6 +255,35 @@ Page({
           }
         } catch (e) {
           wx.showToast({ title: '取消失败', icon: 'none' });
+        }
+      }
+    });
+  },
+
+  async accept() {
+    const taskId = this.data.task._id;
+    wx.showModal({
+      title: '确认接取',
+      content: '确定接取此任务？',
+      success: async (r) => {
+        if (!r.confirm) return;
+        try {
+          wx.showLoading({ title: '接取中...' });
+          const res = await wx.cloud.callFunction({
+            name: 'acceptTask',
+            data: { taskId }
+          });
+          wx.hideLoading();
+          if (res.result.code === 0) {
+            wx.showToast({ title: '接取成功' });
+            await this.loadTaskDetail(taskId);
+            await this.sendNotification('accepted');
+          } else {
+            wx.showToast({ title: res.result.msg || '接取失败', icon: 'none' });
+          }
+        } catch (e) {
+          wx.hideLoading();
+          wx.showToast({ title: '操作失败', icon: 'none' });
         }
       }
     });

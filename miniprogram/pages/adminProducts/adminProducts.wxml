@@ -1,0 +1,77 @@
+<view class="container">
+  <view class="top-bar">
+    <text class="top-title">礼品管理</text>
+    <view class="top-actions">
+      <button class="action-btn" bindtap="loadExchangeCodes">兑换码</button>
+      <button class="action-btn primary" bindtap="showAddForm">+ 添加</button>
+    </view>
+  </view>
+
+  <view class="product-list">
+    <view wx:for="{{products}}" wx:key="_id" class="product-card">
+      <view class="product-info">
+        <text class="product-name">{{item.name}}</text>
+        <text class="product-desc">{{item.description || '暂无描述'}}</text>
+        <view class="product-meta">
+          <text class="product-points">{{item.points}} 积分</text>
+          <text class="product-stock">库存：{{item.stock}}</text>
+        </view>
+      </view>
+      <view class="product-actions">
+        <view class="action-link" bindtap="updateStock" data-id="{{item._id}}">改库存</view>
+        <view class="action-link" bindtap="editProduct" data-id="{{item._id}}">编辑</view>
+        <view class="action-link danger" bindtap="deleteProduct" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+    <view wx:if="{{!products.length && !loading}}" class="empty">暂无商品，请添加</view>
+  </view>
+
+  <!-- 添加/编辑弹窗 -->
+  <view wx:if="{{showAddModal}}" class="modal-overlay" bindtap="closeModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">{{editingProduct ? '编辑商品' : '添加商品'}}</view>
+      <view class="form-item">
+        <text class="form-label">名称</text>
+        <input class="form-input" value="{{newProduct.name}}" bindinput="onInput" data-field="name" placeholder="礼品名称"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">所需积分</text>
+        <input class="form-input" type="number" value="{{newProduct.points}}" bindinput="onInput" data-field="points" placeholder="积分"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">库存</text>
+        <input class="form-input" type="number" value="{{newProduct.stock}}" bindinput="onInput" data-field="stock" placeholder="库存数量"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">描述</text>
+        <textarea class="form-textarea" value="{{newProduct.description}}" bindinput="onInput" data-field="description" placeholder="商品描述"/>
+      </view>
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeModal">取消</button>
+        <button class="btn-save" bindtap="saveProduct">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 兑换码弹窗 -->
+  <view wx:if="{{showExchangeCodes}}" class="modal-overlay" bindtap="closeModal">
+    <view class="modal-content small" catchtap="preventBubble">
+      <view class="modal-title">兑换码列表</view>
+      <scroll-view scroll-y class="code-list">
+        <view wx:for="{{exchangeCodes}}" wx:key="_id" class="code-item">
+          <view class="code-info">
+            <text class="code-product">{{item.productName}}</text>
+            <text class="code-value">兑换码：{{item.code}}</text>
+            <text class="code-user">用户：{{item.userName || '未知'}}</text>
+            <text class="code-time">{{item.createTime_str}}</text>
+          </view>
+          <view class="code-status {{item.status}}">{{item.status === 'pending' ? '待使用' : '已使用'}}</view>
+        </view>
+        <view wx:if="{{!exchangeCodes.length}}" class="empty">暂无兑换码</view>
+      </scroll-view>
+      <view class="modal-actions">
+        <button class="btn-save" bindtap="closeModal">关闭</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -37,14 +37,38 @@
 .notif-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 12rpx;
+}
+
+.notif-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
 .notif-title {
   font-size: 30rpx;
   font-weight: 600;
   color: #333;
+}
+
+.result-badge {
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.result-badge.approved {
+  background: #e8f8ef;
+  color: #07c160;
+}
+
+.result-badge.rejected {
+  background: #fde8e8;
+  color: #e74c3c;
 }
 
 .unread-dot {
@@ -60,6 +84,50 @@
   font-size: 28rpx;
   color: #666;
   line-height: 1.6;
+}
+
+.notif-complaint {
+  margin-bottom: 16rpx;
+  padding: 16rpx 20rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.complaint-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12rpx;
+}
+
+.complaint-row:last-child {
+  margin-bottom: 0;
+}
+
+.complaint-label {
+  font-size: 26rpx;
+  color: #999;
+  flex-shrink: 0;
+  width: 140rpx;
+}
+
+.complaint-status {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.complaint-status.status-approved {
+  color: #07c160;
+}
+
+.complaint-status.status-rejected {
+  color: #e74c3c;
+}
+
+.complaint-reply {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.6;
+  flex: 1;
 }
 
 .notif-footer {

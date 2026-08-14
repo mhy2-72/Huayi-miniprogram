@@ -111,3 +111,41 @@
   line-height: 80rpx;
   text-align: center;
 }
+
+/* 申诉入口 */
+.complaint-entry {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 30rpx 0 20rpx;
+  padding: 30rpx;
+  border-radius: 10rpx;
+}
+.complaint-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 20rpx;
+}
+.complaint-text {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+}
+.complaint-arrow {
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+.cert-tags {
+  margin-top: 8rpx;
+}
+.cert-tag {
+  display: block;
+  font-size: 22rpx;
+  color: #fa8c16;
+  background: #fffbe6;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  margin-top: 6rpx;
+  border: 1rpx solid #ffe58f;
+}

@@ -1,4 +1,4 @@
-// pages/aichatgif/aichatgif.js
+// pages/aichat/aichat.js
 const app = getApp();
 
 const FILE_IDS = [
@@ -241,6 +241,23 @@ Page({
     } else {
       wx.showToast({ title: '任务ID无效', icon: 'none' });
     }
+  },
+
+  openPOILocation(e) {
+    const { lat, lng, name, address } = e.currentTarget.dataset;
+    if (lat && lng) {
+      wx.openLocation({
+        latitude: lat,
+        longitude: lng,
+        name: name || '',
+        address: address || '',
+        scale: 16
+      });
+    }
+  },
+
+  goLivingCircle() {
+    wx.navigateTo({ url: '/pages/livingCircle/livingCircle' });
   },
 
   onUnload() {

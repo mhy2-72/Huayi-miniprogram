@@ -1,0 +1,61 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <text class="header-title">管理后台</text>
+    <text class="header-sub">欢迎回来</text>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-section">
+    <view class="stat-card" bindtap="goComplaints">
+      <text class="stat-value pending">{{pendingCount}}</text>
+      <text class="stat-label">待处理申诉</text>
+    </view>
+    <view class="stat-card" bindtap="goQualifications">
+      <text class="stat-value pending">{{certPendingCount}}</text>
+      <text class="stat-label">待审核资质</text>
+    </view>
+    <view class="stat-card" bindtap="goTasks">
+      <text class="stat-value">{{taskCount}}</text>
+      <text class="stat-label">任务总数</text>
+    </view>
+    <view class="stat-card" bindtap="goUsers">
+      <text class="stat-value">{{userCount}}</text>
+      <text class="stat-label">用户总数</text>
+    </view>
+  </view>
+
+  <!-- 功能入口网格 -->
+  <view class="menu-grid">
+    <view class="menu-item" bindtap="goComplaints">
+      <view class="menu-icon">📋</view>
+      <text class="menu-text">申诉处理</text>
+      <view wx:if="{{pendingCount > 0}}" class="menu-badge">{{pendingCount}}</view>
+    </view>
+    <view class="menu-item" bindtap="goQualifications">
+      <view class="menu-icon">🛡️</view>
+      <text class="menu-text">资质认证</text>
+      <view wx:if="{{certPendingCount > 0}}" class="menu-badge">{{certPendingCount}}</view>
+    </view>
+    <view class="menu-item" bindtap="goTasks">
+      <view class="menu-icon">📝</view>
+      <text class="menu-text">任务管理</text>
+    </view>
+    <view class="menu-item" bindtap="goUsers">
+      <view class="menu-icon">👥</view>
+      <text class="menu-text">用户管理</text>
+    </view>
+    <view class="menu-item" bindtap="goProducts">
+      <view class="menu-icon">🎁</view>
+      <text class="menu-text">礼品管理</text>
+    </view>
+    <view class="menu-item" bindtap="goLivingCircle">
+      <view class="menu-icon">📍</view>
+      <text class="menu-text">生活圈管理</text>
+    </view>
+    <view class="menu-item" bindtap="goLogs">
+      <view class="menu-icon">📜</view>
+      <text class="menu-text">操作日志</text>
+    </view>
+  </view>
+</view>

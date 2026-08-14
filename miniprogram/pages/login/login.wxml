@@ -12,11 +12,21 @@
   </block>
   <block wx:else>
   <text class="hint">欢迎回来，{{userInfo.nickName}} {{greeting}}</text>
-  <button class="enter-btn" bindtap="goHome">进入首页</button>
-  <!-- 新增AI体验按钮（仅老人端） -->
-  <button wx:if="{{userInfo && userInfo.role === 'elder'}}" 
-        class="ai-btn" 
-        bindtap="goAIChat">AI语音助手(demo)</button>
+  
+  <!-- 管理员入口 -->
+  <block wx:if="{{userInfo && userInfo.admin}}">
+    <view class="admin-divider">管理员入口</view>
+    <button class="enter-btn" bindtap="goAdmin">进入管理员页面</button>
+    <button class="normal-btn" bindtap="goHome">进入普通用户</button>
+  </block>
+  
+  <!-- 普通用户入口 -->
+  <block wx:else>
+    <button class="enter-btn" bindtap="goHome">进入首页</button>
+    <button wx:if="{{userInfo && userInfo.role === 'elder'}}" 
+          class="ai-btn" 
+          bindtap="goAIChat">AI语音助手(demo)</button>
+  </block>
 </block>
 
 

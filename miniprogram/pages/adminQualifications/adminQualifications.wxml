@@ -1,0 +1,97 @@
+<view class="container">
+  <!-- 筛选 -->
+  <view class="filter-bar">
+    <view wx:for="{{filters}}" wx:key="key"
+          class="filter-item {{filter === item.key ? 'active' : ''}}"
+          bindtap="switchFilter" data-key="{{item.key}}">
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list" wx:if="{{!loading}}">
+    <view wx:if="{{qualifications.length === 0}}" class="empty">暂无资质认证记录</view>
+
+    <view wx:for="{{qualifications}}" wx:key="_id" class="card" bindtap="openDetail" data-id="{{item._id}}">
+      <view class="card-header">
+        <image src="{{item.userAvatar || '/images/default-avatar.png'}}" class="avatar"/>
+        <view class="info">
+          <text class="user-name">{{item.userName || '未知用户'}}</text>
+          <text class="cert-type">{{item.certTypeName}}资质认证</text>
+        </view>
+        <view class="status status-{{item.status}}">{{item.statusText}}</view>
+      </view>
+      <view class="card-body">
+        <text class="desc">{{item.description}}</text>
+      </view>
+      <view wx:if="{{item.evidenceUrls && item.evidenceUrls.length}}" class="evidence-preview">
+        <image wx:for="{{item.evidenceUrls}}" wx:for-item="img" wx:key="*this" src="{{img}}" mode="aspectFill" class="thumb"/>
+      </view>
+      <view class="card-footer">
+        <text class="time">{{item.createTime_str}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <!-- 详情弹窗 -->
+  <view wx:if="{{showDetail && currentItem}}" class="modal-overlay" bindtap="closeDetail">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">资质认证详情</text>
+        <text class="modal-close" bindtap="closeDetail">✕</text>
+      </view>
+
+      <scroll-view scroll-y class="modal-body">
+        <view class="info-section">
+          <view class="info-row">
+            <text class="info-label">申请人</text>
+            <text class="info-value">{{currentItem.userName || '未知'}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">资质类型</text>
+            <text class="info-value cert-type">{{currentItem.certTypeName}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">状态</text>
+            <text class="info-value status-{{currentItem.status}}">{{currentItem.statusText}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">申请时间</text>
+            <text class="info-value">{{currentItem.createTime_str}}</text>
+          </view>
+        </view>
+
+        <view class="desc-section">
+          <text class="section-title">申请说明</text>
+          <text class="desc-text">{{currentItem.description}}</text>
+        </view>
+
+        <view wx:if="{{currentItem.evidenceUrls && currentItem.evidenceUrls.length}}" class="evidence-section">
+          <text class="section-title">证书/证件照片</text>
+          <view class="evidence-grid">
+            <image wx:for="{{currentItem.evidenceUrls}}" wx:for-item="img" wx:key="*this"
+                   src="{{img}}" mode="aspectFill" class="evidence-img"
+                   bindtap="previewImage" data-url="{{img}}"/>
+          </view>
+        </view>
+
+        <view wx:if="{{currentItem.status !== 'pending'}}" class="note-section">
+          <text class="section-title">管理员备注</text>
+          <text class="note-text">{{currentItem.adminNote || '无'}}</text>
+        </view>
+
+        <view wx:if="{{currentItem.status === 'pending'}}" class="admin-note-section">
+          <text class="section-title">审核备注（可选）</text>
+          <textarea class="note-input" placeholder="请输入审核备注..." value="{{adminNote}}" bindinput="onNoteInput"/>
+        </view>
+      </scroll-view>
+
+      <view wx:if="{{currentItem.status === 'pending'}}" class="modal-footer">
+        <button class="btn-reject" bindtap="handleResult" data-result="rejected">驳回</button>
+        <button class="btn-approve" bindtap="handleResult" data-result="resolved">通过</button>
+      </view>
+    </view>
+  </view>
+</view>

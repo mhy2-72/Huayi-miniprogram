@@ -67,6 +67,10 @@ Page({
     });
   },
 
+  goComplain() {
+    wx.navigateTo({ url: '/pages/complain/complain' });
+  },
+
   // 进入AI语音助手页面
   goAIChat() {
     wx.navigateTo({ url: '/pages/aichat/aichat' });

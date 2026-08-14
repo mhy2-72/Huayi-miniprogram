@@ -20,6 +20,15 @@ Page({
       const notifications = res.result.data || [];
       notifications.forEach(item => {
         item.createTime_str = this.formatDate(item.createTime);
+        if (!item.message && item.content) {
+          item.message = item.content;
+        }
+        if (item.type === 'complaint' && !item.result) {
+          item.result = item.message && item.message.indexOf('通过') > -1 ? 'approved' : 'rejected';
+        }
+        if (item.type === 'complaint' && !item.adminReply) {
+          item.adminReply = '';
+        }
       });
       this.setData({ notifications });
     } catch (e) {
@@ -43,20 +52,22 @@ Page({
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   },
 
-  goToTaskDetail(e) {
+  onNotifTap(e) {
     const taskId = e.currentTarget.dataset.taskid;
     const notifId = e.currentTarget.dataset.id;
+    const type = e.currentTarget.dataset.type;
 
-    // 先标记已读并立即更新本地状态
     this.markAsRead(notifId);
+
+    if (type === 'complaint') {
+      wx.showToast({ title: '已标记已读', icon: 'none' });
+      return;
+    }
 
     if (taskId) {
       wx.navigateTo({
         url: `/pages/taskDetail/taskDetail?id=${taskId}`
       });
-    } else {
-      // 无关联任务的通知，仅提示已读
-      wx.showToast({ title: '已标记已读', icon: 'none' });
     }
   },
 

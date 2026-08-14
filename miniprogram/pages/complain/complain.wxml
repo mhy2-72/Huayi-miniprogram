@@ -1,0 +1,143 @@
+<view class="container">
+  <view class="page-header">
+    <text class="page-title">申诉中心 / 资质认证</text>
+    <text class="page-sub">选择您要办理的业务类型</text>
+  </view>
+
+  <view class="section">
+    <view class="section-title">业务类型</view>
+    <view class="type-list">
+      <view wx:for="{{types}}" wx:key="key"
+            class="type-item {{selectedType === item.key ? 'active' : ''}}"
+            bindtap="selectType" data-key="{{item.key}}">
+        {{item.name}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户信息变更 -->
+  <view wx:if="{{selectedType === 'userInfo'}}" class="section">
+    <view class="section-title">变更内容</view>
+    <view class="change-form">
+      <input class="form-input" placeholder="字段名（如：昵称/头像）" value="{{changeKey}}" bindinput="onInput" data-field="changeKey"/>
+      <input class="form-input" placeholder="当前值" value="{{changeOld}}" bindinput="onInput" data-field="changeOld"/>
+      <input class="form-input" placeholder="变更为" value="{{changeNew}}" bindinput="onInput" data-field="changeNew"/>
+      <button class="add-btn" bindtap="addUserChange">+ 添加</button>
+    </view>
+    <view class="change-list">
+      <view wx:for="{{userChanges}}" wx:for-item="change" wx:key="index" class="change-item">
+        <text class="change-text">{{change.key}}: {{change.old}} → {{change.new}}</text>
+        <text class="change-del" bindtap="removeChange" data-index="{{index}}">删除</text>
+      </view>
+      <view wx:if="{{!userChanges.length}}" class="empty-hint">请添加至少一项变更内容</view>
+    </view>
+  </view>
+
+  <!-- 任务相关 -->
+  <view wx:if="{{selectedType === 'task'}}" class="section">
+    <view class="section-title">选择相关任务</view>
+    <view class="task-list">
+      <view wx:for="{{userTasks}}" wx:key="_id"
+            class="task-item {{selectedTaskId === item._id ? 'active' : ''}}"
+            bindtap="selectTask" data-id="{{item._id}}">
+        <text class="task-desc">{{item.description || '未命名任务'}}</text>
+        <text class="task-status">{{item.statusText}}</text>
+      </view>
+      <view wx:if="{{!userTasks.length}}" class="empty-hint">暂无任务，请先接取任务</view>
+    </view>
+  </view>
+
+  <!-- 兑换相关提示 -->
+  <view wx:if="{{selectedType === 'exchange'}}" class="section">
+    <view class="hint-text">请在下方详细描述兑换遇到的问题，管理员将查看您近期的兑换记录进行处理。</view>
+  </view>
+
+  <!-- 生活圈信息错误/补充 -->
+  <view wx:if="{{selectedType === 'livingCircle'}}" class="section">
+    <view class="section-title">申诉子类型</view>
+    <view class="type-list">
+      <view wx:for="{{livingCircleSubTypes}}" wx:key="key"
+            class="type-item {{selectedSubType === item.key ? 'active' : ''}}"
+            bindtap="selectSubType" data-key="{{item.key}}">
+        {{item.name}}
+      </view>
+    </view>
+
+    <!-- 信息有误：选择现有地点 -->
+    <view wx:if="{{selectedSubType === 'error'}}" class="sub-section">
+      <view class="section-title">选择有问题的地点</view>
+      <view class="poi-picker">
+        <picker wx:if="{{livingCirclePOIs.length}}" mode="selector" range="{{livingCirclePOIs}}" range-key="displayText" bindchange="selectPOI" value="{{selectedPOIId}}">
+          <view class="picker-text">{{selectedPOIId ? '已选择' : '请选择有问题的地点（点击选择）'}}</view>
+        </picker>
+        <view wx:else class="empty-hint">暂无生活圈数据</view>
+      </view>
+      <view class="required-hint">⚠️ 必须提供现场照片作为查验依据</view>
+    </view>
+
+    <!-- 补充新地点 -->
+    <view wx:if="{{selectedSubType === 'addition'}}" class="sub-section">
+      <view class="section-title">新地点信息</view>
+      <view class="form-item"><text class="form-label">地点名称</text>
+        <input class="form-input" value="{{newPOI.name}}" bindinput="onPOIInput" data-field="name" placeholder="如：二食堂"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">分类</text>
+        <picker wx:if="{{livingCircleCategories.length}}" mode="selector" range="{{livingCircleCategories}}" range-key="key" bindchange="onCategoryPickerChange" value="{{categoryIndex}}">
+          <view class="picker-text">{{newPOI.category || '请选择分类'}}</view>
+        </picker>
+        <view wx:else class="empty-hint">请联系管理员先添加分类</view>
+      </view>
+      <view class="form-item"><text class="form-label">地址</text>
+        <view class="address-row">
+          <input class="form-input address-input" value="{{newPOI.address}}" bindinput="onPOIInput" data-field="address" placeholder="点击右侧按钮选择位置"/>
+          <button class="location-btn" bindtap="chooseLocation">📍选位置</button>
+        </view>
+      </view>
+      <view class="form-item"><text class="form-label">描述</text>
+        <textarea class="form-textarea" value="{{newPOI.desc}}" bindinput="onPOIInput" data-field="desc" placeholder="对该地点的简要描述（可选）"/>
+      </view>
+      <view class="required-hint">⚠️ 必须提供现场照片作为查验依据，审核通过后地点将自动添加</view>
+    </view>
+  </view>
+
+  <!-- 资质认证申请 -->
+  <view wx:if="{{selectedType === 'certification'}}" class="section">
+    <view class="section-title">选择资质类型</view>
+    <view class="cert-list">
+      <view wx:for="{{certTypes}}" wx:key="key"
+            class="cert-item {{selectedCertType === item.key ? 'active' : ''}}"
+            bindtap="selectCertType" data-key="{{item.key}}">
+        <text class="cert-name">{{item.name}}</text>
+        <text class="cert-desc">{{item.desc}}</text>
+      </view>
+    </view>
+    <view class="required-hint">⚠️ 请上传相关证书/证件照片作为审核依据（如护理证、电工证、维修资质证等）</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">详细说明 <text class="required">*</text></view>
+    <textarea class="description-input" placeholder="请详细描述您遇到的问题（至少10个字）"
+              value="{{description}}" bindinput="onInput" data-field="description"/>
+  </view>
+
+  <view class="section">
+    <view class="section-title">证据图片 <text wx:if="{{selectedType === 'livingCircle' || selectedType === 'certification'}}" class="required">*</text><text wx:else class="optional">(可选，最多5张)</text></view>
+    <view class="image-list">
+      <view wx:for="{{images}}" wx:key="*this" class="image-item">
+        <image src="{{item}}" mode="aspectFill" class="image-preview" bindtap="previewImage" data-url="{{item}}"/>
+        <view class="image-del" catchtap="removeImage" data-index="{{index}}">×</view>
+      </view>
+      <view wx:if="{{images.length < 5}}" class="image-add" bindtap="chooseImages">
+        <text class="add-icon">+</text>
+        <text class="add-text">上传图片</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="submit-btn" bindtap="submitComplaint" disabled="{{submitting}}">
+    {{submitting ? '提交中...' : '提交申诉'}}
+  </button>
+
+  <view class="contact-hint">如有系统功能相关问题，请联系huayigongyong2857@outlook.com</view>
+</view>

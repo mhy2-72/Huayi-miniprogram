@@ -2,9 +2,9 @@
 Page({
   data: {
     role: '',
-    myTasks: [],
-    published: [],
-    myActive: [],
+    myTasks: [],       // 自己发布的任务
+    published: [],     // 可接取的任务
+    myActive: [],      // 自己接取的任务
     loading: true,
     statusText: {
       published: '待接取',
@@ -68,19 +68,24 @@ Page({
     this.setData({ loading: true });
     return wx.cloud.callFunction({ name: 'getMyTasks' }).then(async res => {
       const data = res.result;
-      // 非 teen 用户作为发布者，显示自己发布的任务
-      if (data.role !== 'teen') {
-        const tasks = await this.processTasks(data.tasks);
-        this.setData({ myTasks: tasks, loading: false });
-        this.checkAutoCancelledTasks(tasks);
-      } else {
-        // teen 用户作为接取者，显示可接任务和自己接取的任务
-        const published = await this.processTasks(data.published);
-        const myActive = await this.processTasks(data.myActive);
-        this.setData({ published, myActive, loading: false });
-        const allTasks = [...published, ...myActive];
-        this.checkAutoCancelledTasks(allTasks);
-      }
+      const role = data.role;
+      this.setData({ role });
+
+      // 所有角色都处理三类数据
+      const [myTasks, published, myActive] = await Promise.all([
+        this.processTasks(data.tasks),
+        this.processTasks(data.published),
+        this.processTasks(data.myActive)
+      ]);
+
+      this.setData({
+        myTasks: myTasks,
+        published: published,
+        myActive: myActive,
+        loading: false
+      });
+
+      this.checkAutoCancelledTasks([...myTasks, ...published, ...myActive]);
     }).catch(err => {
       console.error('加载任务失败', err);
       this.setData({ loading: false });
@@ -189,7 +194,7 @@ Page({
         wx.showToast({title:'已接取'});
         this.loadData();
       }else{
-        wx.showToast({title:res.result.msg,icon:'none)'});
+        wx.showToast({title:res.result.msg,icon:'none'});
       }
     }catch(e){
       wx.showToast({title:'操作失败',icon:'none'});
@@ -198,29 +203,11 @@ Page({
 
   async sendNotification(taskId,type) {
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'getMyTasks'
-      });
-      const data = res.result;
-      let task = null;
-      if (data.role !== 'teen') {
-        task = data.tasks.find(t => t._id === taskId);
-      } else {
-        task = data.published.find(t => t._id === taskId) || 
-               data.myActive.find(t => t._id === taskId);
-      }
-      if (!task) return;
       await wx.cloud.callFunction({
         name: 'sendTaskNotification',
         data: {
           taskId: taskId,
-          type: type,
-          taskData: {
-            _id: task._id,
-            description: task.description,
-            elderId: task.elderId,
-            youthId: task.youthId
-          }
+          type: type
         }
       });
     } catch (e) {

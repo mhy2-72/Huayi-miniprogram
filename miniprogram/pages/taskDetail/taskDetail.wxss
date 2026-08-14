@@ -3,154 +3,23 @@
   padding: 30rpx;
 }
 
-.task-info {
-  margin-bottom: 20rpx;
+.cert-notice {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #fff7e6, #ffe7ba);
+  border: 1rpx solid #ffd591;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 24rpx;
 }
-
-.label {
-  font-size: 28rpx;
-  color: #999;
-  display: block;
-  margin-bottom: 6rpx;
-}
-
-.value {
+.cert-icon {
   font-size: 32rpx;
-  color: #333;
+  margin-right: 12rpx;
 }
-
-.cancel-reason {
-  color: #c62828;
-  background: #fce4ec;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
-  display: inline-block;
-}
-
-.img-list {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 10rpx 0;
-}
-
-.img-list image {
-  width: 200rpx;
-  height: 200rpx;
-  margin-right: 10rpx;
-  margin-bottom: 10rpx;
-  border-radius: 10rpx;
-}
-
-.action-area {
-  margin-top: 40rpx;
-}
-
-.rating-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.rating-title {
-  font-size: 32rpx;
-  color: #333;
-}
-
-.stars {
-  margin: 10rpx 0;
-}
-
-.star {
-  font-size: 60rpx;
-  color: #ddd;
-  margin: 0 10rpx;
-}
-
-.star.active {
-  color: #ff9500;
-}
-
-button {
-  margin-top: 20rpx;
-  width: 80%;
-}
-
-.btn-cancel {
-  background: #fff;
-  color: #ff3b30;
-  border: 1px solid #ff3b30;
-}
-
-.btn-cancel-accept {
-  background: #ff9500;
-  color: #fff;
-}
-
-.btn-confirm {
-  background: #07c160;
-  color: #fff;
-}
-
-.btn-submit {
-  background: #007aff;
-  color: #fff;
-}
-
-.status-ended {
-  background: #f9f9f9;
-  padding: 20rpx;
-  border-radius: 10rpx;
-  margin-top: 30rpx;
-}
-
-.empty {
-  text-align: center;
-  margin-top: 100rpx;
-  color: #999;
-}
-
-.participants {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30rpx;
-  padding: 20rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
-}
-.participant {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-.participant-avatar {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 50%;
-  margin-bottom: 10rpx;
-}
-.participant-name {
-  font-size: 28rpx;
-  color: #333;
-}
-.divider {
-  margin: 0 20rpx;
-  font-size: 36rpx;
-  color: #ccc;
-}
-.participant-role {
-  font-size: 22rpx;
-  color: #999;
-  margin-top: 6rpx;
-}
-.loading-tip {
-  text-align: center;
-  padding: 200rpx 0;
-  color: #999;
-  font-size: 30rpx;
-}.container {
-  padding: 30rpx;
+.cert-text {
+  font-size: 26rpx;
+  color: #d46b08;
+  font-weight: 500;
 }
 
 .task-info {
@@ -246,6 +115,12 @@ button {
   color: #fff;
 }
 
+.btn-accept {
+  background: #07c160;
+  color: #fff;
+  font-weight: bold;
+}
+
 .status-ended {
   background: #f9f9f9;
   padding: 20rpx;
@@ -259,7 +134,6 @@ button {
   color: #999;
 }
 
-/* 新增参与者模块样式 */
 .participants {
   display: flex;
   align-items: center;
@@ -269,32 +143,38 @@ button {
   border-radius: 16rpx;
   box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
 }
+
 .participant {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
 }
+
 .participant-avatar {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
   margin-bottom: 10rpx;
 }
+
 .participant-name {
   font-size: 28rpx;
   color: #333;
 }
+
 .divider {
   margin: 0 20rpx;
   font-size: 36rpx;
   color: #ccc;
 }
+
 .participant-role {
   font-size: 22rpx;
   color: #999;
   margin-top: 6rpx;
 }
+
 .deleted-tip {
   font-size: 22rpx;
   color: #d9534f;
@@ -302,4 +182,11 @@ button {
   padding: 2rpx 10rpx;
   border-radius: 8rpx;
   margin-top: 4rpx;
+}
+
+.loading-tip {
+  text-align: center;
+  padding: 200rpx 0;
+  color: #999;
+  font-size: 30rpx;
 }

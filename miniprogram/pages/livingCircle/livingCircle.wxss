@@ -3,6 +3,40 @@
   min-height: 100vh;
   background: #f6f6f6;
 }
+
+.disclaimer {
+  text-align: center;
+  padding: 12rpx 24rpx;
+  background: #f5f5f5;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 范围提示横幅 */
+.range-banner {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(90deg, #fff7e6 0%, #ffe4b5 100%);
+  border-bottom: 1rpx solid #ffd591;
+}
+.range-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+.range-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #ad6800;
+  line-height: 1.5;
+}
+.range-close {
+  font-size: 36rpx;
+  color: #ad6800;
+  padding: 0 12rpx;
+}
+
 .search-bar {
   padding: 20rpx 24rpx;
   background: #fff;
@@ -34,12 +68,15 @@
   background: #07c160;
   color: #fff;
 }
-.tip {
+
+.range-tip {
   padding: 20rpx 24rpx;
-  color: #e6a23c;
+  color: #ad6800;
   font-size: 26rpx;
-  background: #fdf6ec;
+  background: #fff7e6;
+  border-bottom: 1rpx solid #ffe4b5;
 }
+
 .result-list {
   padding: 20rpx 24rpx;
 }
@@ -52,6 +89,17 @@
 .poi-card.best {
   border: 2rpx solid #07c160;
 }
+.poi-card.out-range {
+  opacity: 0.75;
+  background: #f9f9f9;
+}
+.poi-card.out-range .poi-name {
+  color: #666;
+}
+.poi-card.out-range .poi-desc {
+  color: #999;
+}
+
 .poi-head {
   display: flex;
   justify-content: space-between;
@@ -69,16 +117,39 @@
   border-radius: 6rpx;
   padding: 4rpx 12rpx;
 }
+.range-tag {
+  font-size: 20rpx;
+  color: #999;
+  background: #e8e8e8;
+  border-radius: 6rpx;
+  padding: 4rpx 12rpx;
+  margin-left: 12rpx;
+}
+.poi-desc {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
+}
 .poi-meta {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   margin-top: 12rpx;
   font-size: 26rpx;
 }
 .poi-cat {
   color: #07c160;
+  margin-right: 16rpx;
 }
 .poi-dist {
+  color: #999;
+  margin-right: 16rpx;
+}
+.poi-range {
+  font-size: 22rpx;
+  color: #07c160;
+}
+.out-range .poi-range {
   color: #999;
 }
 .poi-addr {

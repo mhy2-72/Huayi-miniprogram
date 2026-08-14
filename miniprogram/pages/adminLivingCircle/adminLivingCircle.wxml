@@ -1,0 +1,94 @@
+<view class="container">
+  <!-- 分类管理 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">分类管理</text>
+      <button class="mini-btn" bindtap="showAddCategoryForm">+ 添加分类</button>
+    </view>
+    <view class="category-list">
+      <view wx:for="{{categories}}" wx:key="key" class="category-item {{selectedCategory === item.key ? 'active' : ''}}"
+            bindtap="selectCategory" data-key="{{item.key}}">
+        <text class="cat-key">{{item.key}}</text>
+        <text class="cat-sep">|</text>
+        <text class="cat-name">{{item.name}}</text>
+        <view class="cat-delete" catchtap="deleteCategory" data-key="{{item.key}}">×</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 地点管理 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">地点管理</text>
+      <button class="mini-btn" bindtap="showAddPOIForm">+ 添加地点</button>
+    </view>
+    <view class="poi-list">
+      <view wx:for="{{filteredPOIs}}" wx:key="id" class="poi-card">
+        <view class="poi-head">
+          <text class="poi-name">{{item.name}}</text>
+          <text class="poi-cat">{{item.categoryName}}</text>
+        </view>
+        <view class="poi-address">{{item.address}}</view>
+        <view class="poi-meta">
+          <text>评分：{{item.rating}}</text>
+          <view class="action-links">
+            <text class="link" bindtap="editPOI" data-id="{{item.id}}">编辑</text>
+            <text class="link danger" bindtap="deletePOI" data-id="{{item.id}}">删除</text>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{!filteredPOIs.length}}" class="empty">暂无地点</view>
+    </view>
+  </view>
+
+  <!-- 添加分类弹窗 -->
+  <view wx:if="{{showAddCategory}}" class="modal-overlay" bindtap="closeAddCategory">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">添加分类</view>
+      <view class="form-item"><text class="form-label">分类索引</text>
+        <input class="form-input" value="{{newCategoryKey}}" bindinput="onCategoryKeyInput" placeholder="如：canteen"/>
+      </view>
+      <view class="form-item"><text class="form-label">分类名称</text>
+        <input class="form-input" value="{{newCategoryName}}" bindinput="onCategoryNameInput" placeholder="如：食堂"/>
+      </view>
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeAddCategory">取消</button>
+        <button class="btn-save" bindtap="saveCategory">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加/编辑地点弹窗 -->
+  <view wx:if="{{showAddPOI}}" class="modal-overlay" bindtap="closeAddPOI">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">{{editingPOI ? '编辑地点' : '添加地点'}}</view>
+      <view class="form-item"><text class="form-label">名称</text>
+        <input class="form-input" value="{{newPOI.name}}" bindinput="onPOIInput" data-field="name"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">分类索引</text>
+        <picker wx:if="{{categories.length}}" mode="selector" range="{{categories}}" range-key="key" bindchange="onCategoryPickerChange" value="{{categoryIndex}}">
+          <view class="picker-text">{{newPOI.category || '请选择分类'}}</view>
+        </picker>
+        <view wx:else class="picker-text empty">请先添加分类</view>
+      </view>
+      <view class="form-item"><text class="form-label">地址</text>
+        <view class="address-row">
+          <input class="form-input address-input" value="{{newPOI.address}}" bindinput="onPOIInput" data-field="address" placeholder="点击右侧按钮选择位置"/>
+          <button class="location-btn" bindtap="chooseLocation">📍选位置</button>
+        </view>
+        <view wx:if="{{newPOI.latitude}}" class="location-hint">已选坐标：{{newPOI.latitude}}, {{newPOI.longitude}}</view>
+      </view>
+      <view class="form-item"><text class="form-label">评分</text>
+        <input class="form-input" value="{{newPOI.rating}}" bindinput="onPOIInput" data-field="rating" type="digit"/>
+      </view>
+      <view class="form-item"><text class="form-label">描述</text>
+        <textarea class="form-textarea" value="{{newPOI.desc}}" bindinput="onPOIInput" data-field="desc"/>
+      </view>
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeAddPOI">取消</button>
+        <button class="btn-save" bindtap="savePOI">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

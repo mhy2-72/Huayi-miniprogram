@@ -1,0 +1,63 @@
+<view class="container">
+  <view class="filter-bar">
+    <view class="filter-item {{filter === item.key ? 'active' : ''}}"
+          wx:for="{{filters}}" wx:key="key"
+          bindtap="switchFilter" data-key="{{item.key}}">
+      {{item.label}}
+    </view>
+  </view>
+
+  <view class="task-list">
+    <view wx:for="{{tasks}}" wx:key="_id" class="task-card">
+      <view class="task-head">
+        <text class="task-title">{{item.description || '未命名任务'}}</text>
+        <text class="task-status {{statusClass[item.status]}}">{{item.statusText}}</text>
+      </view>
+      <view class="task-info">
+        <text>发布者：{{item.elderName || '未知'}}</text>
+        <text wx:if="{{item.youthName}}">接取者：{{item.youthName}}</text>
+      </view>
+      <view class="task-meta">
+        <text>难度：{{item.difficulty || '-'}}星</text>
+        <text>积分：{{item.points || 0}}</text>
+        <text>{{item.createTime_str}}</text>
+      </view>
+      <view class="task-actions">
+        <view class="action-link" bindtap="viewDetail" data-id="{{item._id}}">详情</view>
+        <view class="action-link" bindtap="editTask" data-id="{{item._id}}">修改</view>
+        <view class="action-link danger" bindtap="deleteTask" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+    <view wx:if="{{!tasks.length && !loading}}" class="empty">暂无任务</view>
+  </view>
+
+  <view wx:if="{{showEditModal && editingTask}}" class="modal-overlay" bindtap="closeModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">修改任务</view>
+      <view class="form-item">
+        <text class="form-label">任务状态</text>
+        <view class="status-options">
+          <view wx:for="{{filters}}" wx:key="key"
+                class="status-opt {{editStatus === item.key ? 'active' : ''}}"
+                bindtap="selectStatus" data-key="{{item.key}}">
+            {{item.label}}
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{editStatus === 'completed'}}" class="form-item">
+        <text class="form-label">评分</text>
+        <view class="rating-options">
+          <view wx:for="{{[1,2,3,4,5]}}" wx:for-item="r" wx:key="*this"
+                class="rating-opt {{editRating >= r ? 'active' : ''}}"
+                bindtap="setRating" data-val="{{r}}">★</view>
+        </view>
+        <text class="rating-val">{{editRating}} 星</text>
+      </view>
+
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeModal">取消</button>
+        <button class="btn-save" bindtap="saveEdit">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,14 @@
+<view class="container">
+  <view class="log-list">
+    <view wx:for="{{logs}}" wx:key="_id" class="log-card">
+      <view class="log-head">
+        <text class="log-admin">{{item.adminName || '管理员'}}</text>
+        <text class="log-time">{{item.createTime_str}}</text>
+      </view>
+      <view class="log-action">{{item.action}}</view>
+      <view wx:if="{{item.target}}" class="log-target">目标：{{item.target}}</view>
+      <view wx:if="{{item.detail}}" class="log-detail">{{item.detail}}</view>
+    </view>
+    <view wx:if="{{!logs.length && !loading}}" class="empty">暂无日志</view>
+  </view>
+</view>

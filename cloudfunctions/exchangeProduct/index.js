@@ -1,6 +1,6 @@
 //cloudfunctions\exchangeProduct\index.js
 const cloud = require('wx-server-sdk');
-cloud.init();
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 
 exports.main = async (event, context) => {
@@ -79,7 +79,9 @@ exports.main = async (event, context) => {
     return {
       code: 0,
       msg: '兑换成功',
-      pointsAfter: result.pointsAfter
+      pointsAfter: result.pointsAfter,
+      exchangeCode,
+      productName
     };
   } catch (e) {
     console.error('exchangeProduct error:', e);
