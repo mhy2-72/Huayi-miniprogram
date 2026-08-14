@@ -35,7 +35,7 @@
   
   <!-- 助老版AI入口（仅老人可见） -->
   <view wx:if="{{userInfo.role === 'elder'}}" class="ai-section">
-    <button class="ai-btn" bindtap="goAIChat">AI语音助手(demo)</button>
+    <button class="ai-btn" bindtap="goAIChat">AI语音助手</button>
   </view>
   
   <view class="logout-section">
