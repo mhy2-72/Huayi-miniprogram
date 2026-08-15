@@ -16,7 +16,7 @@ exports.main = async (event, context) => {
     status: 'submitted'
   }).get();
 
-  if (tasks.data.length === 0) return { code: -1, reply: `未找到待评价的任务“${taskName}”` };
+  if (tasks.data.length === 0) return { code: -1, reply: `未找到待评价的任务"${taskName}"` };
   const task = tasks.data[0];
 
   let youthName = '年轻人';
@@ -47,7 +47,21 @@ exports.main = async (event, context) => {
     await transaction.collection('users').doc(task.youthId).update({
       data: { points: db.command.inc(youthPoints) }
     });
+
+    // 写入年轻人积分获得日志（与 confirmTask 保持一致）
+    if (youthPoints > 0) {
+      await transaction.collection('pointLogs').add({
+        data: {
+          userId: task.youthId,
+          amount: youthPoints,
+          type: 'income',
+          desc: `完成"${task.description}"获得${youthPoints}积分（AI评价${star}星，难度${difficulty}）`,
+          taskId: task._id,
+          createTime: new Date()
+        }
+      });
+    }
   });
 
-  return { code: 0, reply: `任务“${taskName}”已完成，评价为“${star}”星，“${youthName}”获得“${youthPoints}”积分` };
+  return { code: 0, reply: `任务"${taskName}"已完成，评价为"${star}"星，"${youthName}"获得"${youthPoints}"积分` };
 };

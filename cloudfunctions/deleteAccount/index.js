@@ -117,4 +117,4 @@ exports.main = async (event, context) => {
   });
 
   return { code: 0, msg: '账号已注销' };
-}; 
+};

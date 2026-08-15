@@ -47,7 +47,7 @@ Page({
   getRoleText(role, gender) {
     if (role === 'elder') {
       return gender === 'male' ? '爷爷' : '奶奶';
-    } else if (role === 'young' || 'middle') {
+    } else if (role === 'young' || role === 'middle') {
       return gender === 'male' ? '先生' : '女士';
     } else if (role === 'teen') {
       return gender === 'male' ? '少年' : '少女';
