@@ -15,6 +15,12 @@
     <image src="{{isSoundOn ? '/images/sound.png' : '/images/mute.png'}}" mode="aspectFit" class="voice-icon"></image>
   </view>
 
+  <!-- 体验版提示 -->
+  <view wx:if="{{isGuest}}" class="guest-tip-bar">
+    <text class="guest-tip-icon">🔒</text>
+    <text class="guest-tip-text">当前为体验模式，发送消息需先登录</text>
+  </view>
+
   <!-- 角色图像（双层层叠 + cross-fade，避免帧切换闪烁） -->
   <view class="character-container {{characterMoved ? 'moved' : ''}}">
     <!-- 高度占位：保持容器高度不塌陷 -->
@@ -99,9 +105,10 @@
 
   <!-- 底部输入区域 -->
     <view class="input-area">
-      <input class="text-input" 
-            placeholder="输入您的问题或指令" 
+      <input class="text-input {{isGuest ? 'disabled' : ''}}" 
+            placeholder="{{isGuest ? '请先登录后再发送消息' : '输入您的问题或指令'}}" 
             value="{{inputText}}" 
+            disabled="{{isGuest}}"
             bindinput="onInput" 
             confirm-type="send" 
             bindconfirm="sendMessage"/>

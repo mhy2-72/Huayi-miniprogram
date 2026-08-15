@@ -45,6 +45,9 @@
   padding: 32rpx 28rpx;
   margin-bottom: 20rpx;
 }
+.guest-tip-bar { display: flex; align-items: center; justify-content: center; background: #fff8e1; color: #ff9800; font-size: 26rpx; padding: 12rpx 20rpx; margin-bottom: 20rpx; border-radius: 8rpx; }
+.guest-tip-icon { margin-right: 10rpx; }
+.guest-tip-text { }
 .page-title {
   display: block;
   font-size: 36rpx;

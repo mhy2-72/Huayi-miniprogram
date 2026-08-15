@@ -17,6 +17,50 @@ exports.main = async (event, context) => {
   }
   if (!user) return { code: -1, msg: '用户不存在' };
 
+  // 检查未完成任务（无论任何角色，都检查作为发布者和接取者的未完成任务）
+  const UNFINISHED_STATUSES = ['published', 'accepted', 'submitted'];
+  let unfinishedCount = 0;
+  let unfinishedDetails = [];
+
+  // 作为发布者（elderId），检查未完成的发布任务
+  const elderTasks = await db.collection('tasks')
+    .where({
+      elderId: openid,
+      status: _.in(UNFINISHED_STATUSES)
+    })
+    .get();
+  if (elderTasks.data && elderTasks.data.length) {
+    unfinishedCount += elderTasks.data.length;
+    elderTasks.data.forEach(t => {
+      const statusMap = { published: '已发布待接取', accepted: '进行中', submitted: '待确认' };
+      unfinishedDetails.push(`「${t.description.slice(0,12)}」${statusMap[t.status] || t.status}`);
+    });
+  }
+
+  // 作为接取者（youthId），检查未完成的接取任务
+  const youthTasks = await db.collection('tasks')
+    .where({
+      youthId: openid,
+      status: _.in(UNFINISHED_STATUSES)
+    })
+    .get();
+  if (youthTasks.data && youthTasks.data.length) {
+    unfinishedCount += youthTasks.data.length;
+    youthTasks.data.forEach(t => {
+      const statusMap = { published: '已发布待接取', accepted: '进行中', submitted: '待确认' };
+      unfinishedDetails.push(`「${t.description.slice(0,12)}」${statusMap[t.status] || t.status}`);
+    });
+  }
+
+  if (unfinishedCount > 0) {
+    return {
+      code: -2,
+      msg: `您还有 ${unfinishedCount} 个未完成的任务，无法注销账号。请先处理完毕后再试。`,
+      unfinishedCount,
+      details: unfinishedDetails
+    };
+  }
+
   // 删除头像文件
   if (user.avatarUrl) {
     try {
@@ -50,21 +94,16 @@ exports.main = async (event, context) => {
     await db.collection('ttsFiles').where({ userId: openid }).remove();
   }
 
-  // 更新任务中的用户ID为 'accountDeleted'，保留任务数据供前端展示注销状态
+  // 更新任务中的用户ID为 'accountDeleted'，无论任何角色都清除所有关联
   try {
-    if (user.role === 'elder') {
-      await db.collection('tasks').where({ elderId: openid }).update({
-        data: { elderId: 'accountDeleted' }
-      });
-    } else if (user.role === 'youth') {
-      await db.collection('tasks').where({ youthId: openid }).update({
-        data: { youthId: 'accountDeleted' }
-      });
-    }
-    // 若角色为其他，可忽略或按需扩展
+    await db.collection('tasks').where({ elderId: openid }).update({
+      data: { elderId: 'accountDeleted' }
+    });
+    await db.collection('tasks').where({ youthId: openid }).update({
+      data: { youthId: 'accountDeleted' }
+    });
   } catch (e) {
     console.error('更新任务中的用户ID失败:', e);
-    // 更新失败不影响注销流程
   }
 
   // 记录注销日志
@@ -78,4 +117,4 @@ exports.main = async (event, context) => {
   });
 
   return { code: 0, msg: '账号已注销' };
-};
+}; 

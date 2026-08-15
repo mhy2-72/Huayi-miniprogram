@@ -16,6 +16,11 @@
   font-size: 36rpx;
   font-weight: bold;
 }
+.login-hint {
+  font-size: 26rpx;
+  color: #07c160;
+  margin-top: 10rpx;
+}
 .role {
   font-size: 28rpx;
   color: #888;

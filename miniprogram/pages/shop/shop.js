@@ -1,20 +1,29 @@
 const app = getApp();
+const { isGuest, requireLogin } = require('../../utils/auth.js');
 
 Page({
   data: {
     products: [],
     myPoints: 0,
     myOrders: [],
-    showOrders: false
+    showOrders: false,
+    isGuest: false
   },
 
   onLoad() {
+    this.setData({ isGuest: isGuest() });
     this.loadProducts();
     this.loadMyPoints();
     this.loadMyOrders();
   },
 
   onShow() {
+    const guest = isGuest();
+    this.setData({ isGuest: guest });
+    if (guest) {
+      this.setData({ myPoints: 0, myOrders: [] });
+      return;
+    }
     this.loadMyPoints();
     this.loadMyOrders();
   },
@@ -37,6 +46,10 @@ Page({
   },
 
   loadMyPoints() {
+    if (isGuest()) {
+      this.setData({ myPoints: -1 });
+      return Promise.resolve();
+    }
     const db = wx.cloud.database();
     const openid = app.globalData.openid;
     if (!openid) return Promise.reject('openid为空');
@@ -49,6 +62,10 @@ Page({
   },
 
   loadMyOrders() {
+    if (isGuest()) {
+      this.setData({ myOrders: [] });
+      return Promise.resolve();
+    }
     return wx.cloud.callFunction({ name: 'getMyOrders' }).then(res => {
       const orders = (res.result.data || []).map(o => ({
         ...o,
@@ -73,6 +90,7 @@ Page({
   },
 
   exchange(e) {
+    if (!requireLogin()) return;
     const productId = e.currentTarget.dataset.id;
     wx.showLoading({ title: '兑换中...' });
     wx.cloud.callFunction({ name: 'exchangeProduct', data: { productId } }).then(res => {

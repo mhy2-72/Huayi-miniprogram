@@ -1,11 +1,13 @@
 //miniprogram\pages\my\my.js
 const app = getApp();
+const { isGuest, exitGuestMode } = require('../../utils/auth.js');
 
 Page({
   data: {
     userInfo: {},
     roleText: '',
-    unreadCount: 0   // 新增未读通知计数
+    unreadCount: 0,
+    isGuest: false
   },
 
   onLoad() {
@@ -14,10 +16,21 @@ Page({
 
   onShow() {
     this.loadUserInfo();
-    this.loadUnreadCount();   // 每次显示页面时获取未读数量
+    this.loadUnreadCount();
   },
 
   loadUserInfo() {
+    const guest = isGuest();
+    this.setData({ isGuest: guest });
+
+    if (guest) {
+      this.setData({
+        userInfo: { nickName: '暂未登录', avatarUrl: '' },
+        roleText: ''
+      });
+      return;
+    }
+
     const db = wx.cloud.database();
     const openid = app.globalData.openid;
     if (!openid) return;
@@ -36,12 +49,13 @@ Page({
       return gender === 'male' ? '爷爷' : '奶奶';
     } else if (role === 'young' || 'middle') {
       return gender === 'male' ? '先生' : '女士';
-    }else if (role === 'teen'){
+    } else if (role === 'teen') {
       return gender === 'male' ? '少年' : '少女';
     }
   },
-  // 获取未读通知数量
+
   async loadUnreadCount() {
+    if (isGuest()) return;
     try {
       const res = await wx.cloud.callFunction({ name: 'getUnreadCount' });
       const count = res.result.count || 0;
@@ -51,11 +65,43 @@ Page({
     }
   },
 
+  goLogin() {
+    wx.reLaunch({ url: '/pages/login/login' });
+  },
+
   goNotifications() {
+    if (isGuest()) {
+      wx.showModal({
+        title: '提示',
+        content: '您暂未登录，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '否',
+        success: (res) => {
+          if (res.confirm) {
+            wx.reLaunch({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
     wx.navigateTo({ url: '/pages/notifications/notifications' });
   },
 
   goPointHistory() {
+    if (isGuest()) {
+      wx.showModal({
+        title: '提示',
+        content: '您暂未登录，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '否',
+        success: (res) => {
+          if (res.confirm) {
+            wx.reLaunch({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
     wx.navigateTo({ url: '/pages/pointHistory/pointHistory' });
   },
 
@@ -71,24 +117,37 @@ Page({
     wx.navigateTo({ url: '/pages/complain/complain' });
   },
 
-  // 进入AI语音助手页面
   goAIChat() {
     wx.navigateTo({ url: '/pages/aichat/aichat' });
   },
 
   Subscribe() {
     wx.requestSubscribeMessage({
-      tmplIds: ['5-rezkv5Ou5ph7UMnVjUX2gVZAg4VFgW-5_c137PrX0'], 
-      success(res) { 
+      tmplIds: ['5-rezkv5Ou5ph7UMnVjUX2gVZAg4VFgW-5_c137PrX0'],
+      success(res) {
         console.log('用户允许了订阅', res);
       },
-      fail(err) { 
+      fail(err) {
         console.log('用户拒绝了或报错', err);
       }
     })
   },
 
   deleteAccount() {
+    if (isGuest()) {
+      wx.showModal({
+        title: '提示',
+        content: '您暂未登录，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '否',
+        success: (res) => {
+          if (res.confirm) {
+            wx.reLaunch({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
     wx.showModal({
       title: '注销账号',
       content: '注销后您的所有信息将被清除，此操作不可恢复，确定继续？',
@@ -101,10 +160,24 @@ Page({
           });
           wx.hideLoading();
           if (result.result.code === 0) {
-            // 清除本地缓存
             wx.removeStorageSync('role');
             app.globalData.userInfo = null;
             wx.reLaunch({ url: '/pages/login/login' });
+          } else if (result.result.code === -2) {
+            // 有未完成任务，禁止注销
+            let content = result.result.msg;
+            if (result.result.details && result.result.details.length > 0) {
+              content += '\n\n未完成任务：\n' + result.result.details.slice(0, 5).join('\n');
+              if (result.result.details.length > 5) {
+                content += `\n... 等共${result.result.unfinishedCount}个`;
+              }
+            }
+            wx.showModal({
+              title: '无法注销',
+              content: content,
+              showCancel: false,
+              confirmText: '知道了'
+            });
           } else {
             wx.showToast({ title: result.result.msg || '注销失败', icon: 'none' });
           }

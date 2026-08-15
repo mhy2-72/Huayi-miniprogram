@@ -5,6 +5,12 @@
 
   <!-- 数据加载完成后显示正常内容 -->
   <block wx:else>
+    <!-- 体验版提示横幅 -->
+    <view wx:if="{{isGuest}}" class="guest-banner">
+      <text class="guest-banner-icon">👀</text>
+      <text class="guest-banner-text">当前为体验模式，仅可浏览，发布/接取/兑换需登录</text>
+    </view>
+
     <!-- 生活圈服务入口 -->
     <view class="living-circle-entry" bindtap="goLivingCircle">
       <text class="lc-icon">🏘️</text>
@@ -15,8 +21,8 @@
       <text class="lc-arrow">›</text>
     </view>
     
-    <!-- 发布者面板（非 teen 显示） -->
-    <view wx:if="{{role !== 'teen'}}" class="elder-panel">
+    <!-- 发布者面板（非 teen 且非 guest 显示） -->
+    <view wx:if="{{role !== 'teen' && !isGuest}}" class="elder-panel">
       <button class="publish-btn" bindtap="goPublish">＋ 发布新任务</button>
       
       <view class="section-title">我发布的任务</view>
@@ -41,7 +47,7 @@
       </view>
     </view>
 
-    <!-- 接取者面板（所有角色均显示） -->
+    <!-- 接取者面板（所有角色均显示，含 guest） -->
     <view class="youth-panel">
       <view class="section-title">可接任务</view>
       <view class="task-list">
@@ -51,15 +57,17 @@
               <view class="task-left">
                 <text class="desc">{{item.description}}</text>
               </view>
-              <button class="accept-btn" catchtap="accept" data-id="{{item._id}}">接取</button>
+              <button wx:if="{{!isGuest}}" class="accept-btn" catchtap="accept" data-id="{{item._id}}">接取</button>
+              <view wx:else class="accept-btn guest-accept" catchtap="accept" data-id="{{item._id}}">🔒 登录后接取</view>
             </view>
           </view>
         </block>
         <view wx:if="{{!published.length}}" class="empty">暂无可接任务</view>
       </view>
 
-      <view class="section-title">我接取的任务</view>
-      <view class="task-list">
+      <!-- 我接取的任务仅登录用户可见 -->
+      <view wx:if="{{!isGuest}}" class="section-title">我接取的任务</view>
+      <view wx:if="{{!isGuest}}" class="task-list">
         <block wx:for="{{myActive}}" wx:key="_id">
           <view class="task-card {{statusClass[item.status]}}" bindtap="goDetail" data-id="{{item._id}}">
             <view class="task-content">

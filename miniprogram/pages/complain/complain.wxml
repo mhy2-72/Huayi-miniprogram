@@ -4,6 +4,12 @@
     <text class="page-sub">选择您要办理的业务类型</text>
   </view>
 
+  <!-- 体验版提示 -->
+  <view wx:if="{{isGuest}}" class="guest-tip-bar">
+    <text class="guest-tip-icon">🔒</text>
+    <text class="guest-tip-text">当前为体验模式，提交申诉需先登录</text>
+  </view>
+
   <view class="section">
     <view class="section-title">业务类型</view>
     <view class="type-list">
@@ -135,8 +141,8 @@
     </view>
   </view>
 
-  <button class="submit-btn" bindtap="submitComplaint" disabled="{{submitting}}">
-    {{submitting ? '提交中...' : '提交申诉'}}
+  <button class="submit-btn" bindtap="submitComplaint" disabled="{{isGuest || submitting}}">
+    {{submitting ? '提交中...' : (isGuest ? '请先登录后提交' : '提交申诉')}}
   </button>
 
   <view class="contact-hint">如有系统功能相关问题，请联系huayigongyong2857@outlook.com</view>

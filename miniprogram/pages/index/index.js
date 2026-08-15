@@ -1,4 +1,6 @@
 // pages/index/index.js
+const { isGuest, requireLogin } = require('../../utils/auth.js');
+
 Page({
   data: {
     role: '',
@@ -6,6 +8,7 @@ Page({
     published: [],     // 可接取的任务
     myActive: [],      // 自己接取的任务
     loading: true,
+    isGuest: false,
     statusText: {
       published: '待接取',
       accepted: '进行中',
@@ -23,7 +26,8 @@ Page({
   },
 
   onLoad() {
-    this.setData({ role: wx.getStorageSync('role') });
+    const guest = isGuest();
+    this.setData({ role: wx.getStorageSync('role'), isGuest: guest });
     this.loadData();
   },
 
@@ -53,6 +57,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ isGuest: isGuest() });
     this.loadData();
   },
 
@@ -66,7 +71,9 @@ Page({
 
   loadData() {
     this.setData({ loading: true });
-    return wx.cloud.callFunction({ name: 'getMyTasks' }).then(async res => {
+    const guest = isGuest();
+    const dataParam = guest ? { skipPersonal: true } : {};
+    return wx.cloud.callFunction({ name: 'getMyTasks', data: dataParam }).then(async res => {
       const data = res.result;
       const role = data.role;
       this.setData({ role });
@@ -170,6 +177,7 @@ Page({
   },
 
   goPublish() {
+    if (!requireLogin()) return;
     wx.navigateTo({ url: '/pages/publish/publish' });
   },
 
@@ -183,6 +191,7 @@ Page({
   },
 
   async accept(e) {
+    if (!requireLogin()) return;
     const taskId = e.currentTarget.dataset.id;
     try {
       const res = await wx.cloud.callFunction({

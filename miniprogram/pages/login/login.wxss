@@ -85,3 +85,39 @@
   border: 2rpx solid #07c160 !important;
   margin-top: 20rpx;
 }
+
+/* 体验版入口 */
+.guest-section {
+  margin-top: 60rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.guest-divider {
+  display: flex;
+  align-items: center;
+  width: 80%;
+  margin-bottom: 30rpx;
+}
+.guest-line {
+  flex: 1;
+  height: 1rpx;
+  background: #ddd;
+}
+.guest-text {
+  padding: 0 20rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+.guest-btn {
+  width: 60%;
+  background: #fff;
+  color: #07c160;
+  border: 2rpx solid #07c160;
+  font-size: 32rpx;
+}
+.guest-hint {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 16rpx;
+}

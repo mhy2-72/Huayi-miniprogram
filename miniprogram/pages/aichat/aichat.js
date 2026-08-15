@@ -1,5 +1,6 @@
 // pages/aichat/aichat.js
 const app = getApp();
+const { isGuest, requireLogin } = require('../../utils/auth.js');
 
 const FILE_IDS = [
   'cloud://cloud1-d3gqpcznd38f2891a.636c-cloud1-d3gqpcznd38f2891a-1463354353/animation/stick.png',
@@ -50,11 +51,12 @@ Page({
     characterSrcB: '',    // 动态图（gif）
     imgLayer: 'a',        // 'a' = 显示静态，'b' = 显示GIF
     isSpeaking: false,
-    imageMap: {}          // 存储本地路径（或降级云URL）
+    imageMap: {},         // 存储本地路径（或降级云URL）
+    isGuest: false
   },
 
   async onLoad() {
-    this.setData({ pageReady: false });
+    this.setData({ pageReady: false, isGuest: isGuest() });
 
     try {
       // 1. 获取云临时 URL
@@ -134,6 +136,7 @@ Page({
   },
 
   async sendMessage() {
+    if (!requireLogin()) return;
     const text = this.data.inputText.trim();
     if (!text) return;
 

@@ -1,4 +1,5 @@
 const MAX_IMAGES = 5;
+const { isGuest, requireLogin } = require('../../utils/auth.js');
 const CERT_TYPES = [
   { key: 'nursing', name: '护理', desc: '适用于陪护、护理相关任务' },
   { key: 'repair', name: '修理', desc: '适用于家电维修、水电维修等任务' }
@@ -7,6 +8,7 @@ const CERT_TYPES = [
 Page({
   data: {
     pageTitle: '申诉中心',
+    isGuest: false,
     types: [
       { key: 'userInfo', name: '用户信息变更申诉' },
       { key: 'task', name: '任务相关申诉' },
@@ -39,11 +41,13 @@ Page({
   },
 
   onLoad() {
+    this.setData({ isGuest: isGuest() });
     this.loadUserTasks();
     this.loadLivingCircleData();
   },
 
   async loadLivingCircleData() {
+    if (isGuest()) return;
     try {
       const res = await wx.cloud.callFunction({ name: 'getLivingCircle' });
       if (res.result && res.result.code === 0) {
@@ -57,6 +61,7 @@ Page({
   },
 
   async loadUserTasks() {
+    if (isGuest()) return;
     try {
       const res = await wx.cloud.callFunction({ name: 'getMyTasks', data: {} });
       if (res.result) {
@@ -197,6 +202,7 @@ Page({
   },
 
   async submitComplaint() {
+    if (!requireLogin()) return;
     const { selectedType, userChanges, selectedTaskId, description, images, selectedSubType, selectedPOIId, newPOI, selectedCertType } = this.data;
     if (!selectedType) { wx.showToast({ title: '请选择申诉类型', icon: 'none' }); return; }
     if (!description || description.length < 10) { wx.showToast({ title: '请详细描述（至少10字）', icon: 'none' }); return; }

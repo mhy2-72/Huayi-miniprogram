@@ -1,5 +1,6 @@
 // pages/taskDetail/taskDetail.js
 const app = getApp();
+const { isGuest, requireLogin } = require('../../utils/auth.js');
 
 Page({
   data: {
@@ -207,6 +208,7 @@ Page({
   setRating(e) { this.setData({ rating: e.currentTarget.dataset.val }); },
 
   async confirmComplete() {
+    if (!requireLogin()) return;
     const { task, rating } = this.data;
     wx.showModal({
       title: '确认完成', 
@@ -233,6 +235,7 @@ Page({
   },
 
   cancel() {
+    if (!requireLogin()) return;
     wx.showModal({
       title: '取消任务', 
       content: '确定取消此任务？',
@@ -261,6 +264,7 @@ Page({
   },
 
   async accept() {
+    if (!requireLogin()) return;
     const taskId = this.data.task._id;
     wx.showModal({
       title: '确认接取',
@@ -290,6 +294,7 @@ Page({
   },
 
   cancelAccept() {
+    if (!requireLogin()) return;
     wx.showModal({
       title: '取消接取', 
       content: '确定放弃此任务？截止时间将延长3小时。',
@@ -318,6 +323,7 @@ Page({
   },
 
   goSubmitEvidence() {
+    if (!requireLogin()) return;
     wx.navigateTo({ 
       url: `/pages/submitEvidence/submitEvidence?taskId=${this.data.task._id}` 
     });

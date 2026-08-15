@@ -1,4 +1,6 @@
 //miniprogram\pages\register\register.js
+const { exitGuestMode } = require('../../utils/auth.js');
+
 Page({
   data: {
     avatarUrl: '',
@@ -84,6 +86,8 @@ Page({
     }).then(res => {
       wx.hideLoading();
       if (res.result.code === 0) {
+        // 注册成功，退出体验模式，恢复正常用户身份
+        exitGuestMode();
         wx.setStorageSync('role', res.result.role);
         wx.switchTab({ url: '/pages/index/index' });
       } else {

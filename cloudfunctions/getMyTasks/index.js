@@ -8,6 +8,22 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
   
+  const skipPersonal = event.skipPersonal === true;
+
+  if (skipPersonal) {
+    const published = await db.collection('tasks')
+      .where({ status: 'published' })
+      .orderBy('createTime', 'desc')
+      .limit(50)
+      .get();
+    return {
+      role: 'guest',
+      tasks: [],
+      published: published.data,
+      myActive: []
+    };
+  }
+
   let role = 'young';
   try {
     const user = await db.collection('users').doc(openid).get();
@@ -42,8 +58,6 @@ exports.main = async (event, context) => {
     .orderBy('createTime', 'desc')
     .get();
 
-  // teen 角色：不可发布，只能接取（隐藏发布面板）
-  // 其他角色：可发布也可接取（同时显示两个面板）
   return {
     role: role,
     tasks: tasks.data,

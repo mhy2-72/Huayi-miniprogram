@@ -1,4 +1,6 @@
 // pages/publish/publish.js
+const { isGuest, requireLogin } = require('../../utils/auth.js');
+
 Page({
   data: {
     description: '',
@@ -228,6 +230,7 @@ Page({
 
   // ========== 提交发布 ==========
   async submit() {
+    if (!requireLogin()) return;
     if (this.data.isSubmitting) return;
     
     if (!this.data.canPublish) {

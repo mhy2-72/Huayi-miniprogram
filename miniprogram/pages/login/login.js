@@ -1,5 +1,6 @@
 //miniprogram\pages\login\login.js
 const app = getApp();
+const { enterGuestMode, exitGuestMode, isGuest } = require('../../utils/auth.js');
 
 Page({
   data: {
@@ -12,6 +13,11 @@ Page({
   },
 
   async onLoad() {
+    // 如果从体验版返回，先退出体验模式
+    if (isGuest()) {
+      exitGuestMode();
+    }
+
     let count = 0;
     while (!app.globalData.openid && count < 30) {
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -87,6 +93,22 @@ Page({
   // 跳转用户协议页面
   showAgreement() {
     wx.navigateTo({ url: '/pages/agreement/agreement' });
+  },
+
+  // 体验版入口
+  goGuest() {
+    // 二次确认：已有账号则不允许进入体验版
+    if (!this.data.needRegister) {
+      wx.showModal({
+        title: '提示',
+        content: '您已有账号，请直接登录使用',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+      return;
+    }
+    enterGuestMode();
+    wx.switchTab({ url: '/pages/index/index' });
   }
 
 });

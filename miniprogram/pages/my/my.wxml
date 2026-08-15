@@ -1,28 +1,37 @@
 <!-- miniprogram\pages\my\my.wxml  -->
 <view class="container">
-  <view class="user-info">
-    <image src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" class="avatar"></image>
-    <view class="user-detail">
-      <text class="nickname">{{userInfo.nickName}}</text>
-      <text class="role">{{roleText}}</text>
-      <view wx:if="{{userInfo.certifications && userInfo.certifications.length}}" class="cert-tags">
-        <text wx:for="{{userInfo.certifications}}" wx:key="type" wx:if="{{item.status === 'approved'}}" class="cert-tag">您已通过{{item.name}}资质认证</text>
+  <view class="user-info" bindtap="{{isGuest ? 'goLogin' : ''}}">
+    <block wx:if="{{isGuest}}">
+      <image src="/images/default-avatar.png" class="avatar"></image>
+      <view class="user-detail">
+        <text class="nickname">暂未登录</text>
+        <text class="login-hint">点击登录 ›</text>
       </view>
-    </view>
+    </block>
+    <block wx:else>
+      <image src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" class="avatar"></image>
+      <view class="user-detail">
+        <text class="nickname">{{userInfo.nickName}}</text>
+        <text class="role">{{roleText}}</text>
+        <view wx:if="{{userInfo.certifications && userInfo.certifications.length}}" class="cert-tags">
+          <text wx:for="{{userInfo.certifications}}" wx:key="type" wx:if="{{item.status === 'approved'}}" class="cert-tag">您已通过{{item.name}}资质认证</text>
+        </view>
+      </view>
+    </block>
   </view>
 
-  <view class="points-box">
+  <view wx:if="{{!isGuest}}" class="points-box">
     <text class="points-label">我的积分</text>
     <text class="points-value">{{userInfo.points || 0}}</text>
   </view>
 
   <view class="menu-list">
     <!-- 通知中心（带红点） -->
-    <view class="menu-item" bindtap="goNotifications">
+    <view wx:if="{{!isGuest}}" class="menu-item" bindtap="goNotifications">
       <text>通知中心</text>
       <view wx:if="{{unreadCount > 0}}" class="red-dot">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
     </view>
-    <view class="menu-item" bindtap="goPointHistory">积分变动记录</view>
+    <view wx:if="{{!isGuest}}" class="menu-item" bindtap="goPointHistory">积分变动记录</view>
     <view class="menu-item" bindtap="goAbout">关于我们</view>
   </view>
 
@@ -33,16 +42,16 @@
     <text class="complaint-arrow">›</text>
   </view>
   
-  <!-- 助老版AI入口（仅老人可见） -->
-  <view wx:if="{{userInfo.role === 'elder'}}" class="ai-section">
+  <!-- AI入口（所有用户可见） -->
+  <view class="ai-section">
     <button class="ai-btn" bindtap="goAIChat">AI语音助手</button>
   </view>
   
-  <view class="logout-section">
+  <view wx:if="{{!isGuest}}" class="logout-section">
     <button class="logout-btn" bindtap="deleteAccount">注销账号</button>
   </view>
 
-  <view class="subscribe-section">
+  <view wx:if="{{!isGuest}}" class="subscribe-section">
     <button class="subscribe-btn" bindtap="Subscribe">订阅通知</button>
   </view>
 </view>

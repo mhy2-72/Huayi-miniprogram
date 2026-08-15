@@ -1,5 +1,8 @@
 <view class="container">
-  <view class="my-points">我的积分：{{myPoints}}</view>
+  <view class="my-points">
+    <block wx:if="{{isGuest}}">我的积分：<text class="guest-login-text">请先登录</text></block>
+    <block wx:else>我的积分：{{myPoints}}</block>
+  </view>
 
   <!-- 商品列表 -->
   <view class="section-title">积分兑换</view>
@@ -13,14 +16,14 @@
           <text class="product-points">{{item.points}}积分</text>
           <text class="product-stock">剩余 {{item.stock}}</text>
         </view>
-        <button class="exchange-btn" bindtap="exchange" data-id="{{item._id}}" disabled="{{myPoints < item.points || item.stock <= 0}}">兑换</button>
+        <button class="exchange-btn" bindtap="exchange" data-id="{{item._id}}" disabled="{{isGuest || myPoints < item.points || item.stock <= 0}}">兑换</button>
       </view>
     </view>
     <view wx:if="{{!products.length}}" class="empty">暂无商品</view>
   </view>
 
-  <!-- 我的兑换记录 -->
-  <view class="orders-section">
+  <!-- 我的兑换记录（仅登录用户显示） -->
+  <view class="orders-section" wx:if="{{!isGuest}}">
     <view class="orders-header" bindtap="toggleOrders">
       <text class="section-title">我的兑换记录</text>
       <text class="orders-toggle">{{showOrders ? '收起' : '展开'}} ({{myOrders.length}})</text>

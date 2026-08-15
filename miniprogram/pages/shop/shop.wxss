@@ -7,6 +7,10 @@
   font-size: 32rpx;
   text-align: center;
 }
+.guest-login-text {
+  color: #ffd700;
+  font-weight: bold;
+}
 .product-card {
   background: #fff;
   border-radius: 10rpx;

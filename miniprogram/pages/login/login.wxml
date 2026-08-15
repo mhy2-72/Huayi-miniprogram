@@ -32,6 +32,17 @@
 
   <button wx:if="{{!isChecking && error}}" bindtap="retry" class="retry-btn">网络错误，点击重试</button>
 
+  <!-- 体验版入口 — 仅新用户可用 -->
+  <view wx:if="{{!isChecking && needRegister}}" class="guest-section">
+    <view class="guest-divider">
+      <text class="guest-line"></text>
+      <text class="guest-text">体验版</text>
+      <text class="guest-line"></text>
+    </view>
+    <button class="guest-btn" bindtap="goGuest">免登录进入体验</button>
+    <text class="guest-hint">浏览全部功能但无法发布/接取/兑换</text>
+  </view>
+
   <!-- 用户协议链接 -->
   <view class="agreement-link" bindtap="showAgreement">用户协议</view>
 </view>
